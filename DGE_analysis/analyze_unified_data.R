@@ -1,5 +1,4 @@
 library(tidyverse)
-library(TCGAbiolinks)
 library(DESeq2)
 library(BiocParallel)
 
@@ -66,8 +65,6 @@ for (i in seq_len(length(dset_paths))) {
             dsets[i],
             "_DGE_padj",
             as.character(padj_thresh),
-            "_l2fc_",
-            as.character(round(l2fc_thresh, digits = 2)),
             ".tsv"
         )
     )
