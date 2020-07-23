@@ -3,7 +3,7 @@
 Make sure you have a file, "dev_paths.txt", in the root project directory laid out as follows:
 ```
 root/path/for/storing/data
-<newline>
+<blank line>
 ```
 
 ## Directory verification script
