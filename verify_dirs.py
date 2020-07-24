@@ -28,10 +28,14 @@ if not os.path.exists(f"{data_dir}/matrisome/matrisome_hs_masterlist.tsv"):
     print(f"[ERROR] Could not find: {data_dir}/matrisome/matrisome_hs_masterlist.tsv")
     all_present = False
 
+# Check existence of analysis directory
 if not os.path.exists(f"{data_dir}/analysis"):
     os.makedirs(f"{data_dir}/analysis")
     print(f"Created directory: {data_dir}/analysis")
 
+if not os.path.exists(f"{data_dir}/figures"):
+    os.makedirs(f"{data_dir}/figures")
+    print(f"Created directory: {data_dir}/figures")
 
 if all_present:
     print(f"[SUCCESS] All necessary data/directories present.")
