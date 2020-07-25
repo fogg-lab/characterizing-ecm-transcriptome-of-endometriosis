@@ -33,7 +33,7 @@ if not os.path.exists(f"{data_dir}/analysis"):
     os.makedirs(f"{data_dir}/analysis")
     print(f"Created directory: {data_dir}/analysis")
 
-# Check existence of analysis directory
+# Check existence of figures directory
 if not os.path.exists(f"{data_dir}/figures"):
     os.makedirs(f"{data_dir}/figures")
     print(f"Created directory: {data_dir}/figures")
