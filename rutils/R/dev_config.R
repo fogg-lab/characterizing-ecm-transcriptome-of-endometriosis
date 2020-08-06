@@ -1,5 +1,3 @@
-
-
 get_dev_directories <- function(dev_paths_file) {
     fn <- dev_paths_file
     con <- file(fn, open =  "r")
