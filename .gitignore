@@ -9,3 +9,4 @@ DGE_analysis/MANIFEST.txt
 
 # Developer-specific files
 dev_paths.txt
+*.png
