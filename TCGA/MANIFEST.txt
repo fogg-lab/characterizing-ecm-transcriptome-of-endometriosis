@@ -1,0 +1,4 @@
+id	filename	md5	size	state
+1cd811e6-a712-4919-94d8-f222c7794e66	1cd811e6-a712-4919-94d8-f222c7794e66/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.0C3AE6A1-F10D-4EE1-A357-D2F3E0F217D1.txt	9b80dc808890f15933b67e8b50df423a	5700	validated
+b8f9538d-78df-4615-a4d4-2c2fc3e0135f	b8f9538d-78df-4615-a4d4-2c2fc3e0135f/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.6DEA112A-68FE-4D44-A1D3-94F52FA9D333.txt	e6c8e2f6d3338c148fd8141114dfc7f2	6108	validated
+ce064514-d2ca-4554-b2c0-3fa4b164d9cd	ce064514-d2ca-4554-b2c0-3fa4b164d9cd/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.AD09DC41-D11F-40EC-BEDA-17B761E52DC8.txt	dc373300fac2178ddaa70917cce951a1	5794	validated
