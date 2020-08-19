@@ -5,7 +5,7 @@
 .ipynb_checkpoints/
 
 # TCGAbiolinks
-DGE_analysis/MANIFEST.txt
+data_retrieval/MANIFEST.txt
 
 # Developer-specific files
 dev_paths.txt
