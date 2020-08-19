@@ -1,4 +1,5 @@
 library(tidyverse)
+library(HDF5Array)
 
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
@@ -31,4 +32,13 @@ balanced_group_sample <- function(counts, coldata, centroids, groups, n, group_c
         samples[[group]] <- res
     }
     return(bind_rows(samples) %>% dplyr::arrange_at(sample_col))
+}
+
+
+load_RSE_objects <- function(dir, projects, prefixes) {
+    data_ls <- list()
+    for (i in seq_len(length(projects))) {
+        data_ls[[projects[i]]] <- loadHDF5SummarizedExperiment(dir = dir, prefix = prefixes[i])
+    }
+    return(data_ls)
 }
