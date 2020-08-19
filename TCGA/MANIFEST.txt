@@ -1,4 +1,8 @@
 id	filename	md5	size	state
-1cd811e6-a712-4919-94d8-f222c7794e66	1cd811e6-a712-4919-94d8-f222c7794e66/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.0C3AE6A1-F10D-4EE1-A357-D2F3E0F217D1.txt	9b80dc808890f15933b67e8b50df423a	5700	validated
-b8f9538d-78df-4615-a4d4-2c2fc3e0135f	b8f9538d-78df-4615-a4d4-2c2fc3e0135f/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.6DEA112A-68FE-4D44-A1D3-94F52FA9D333.txt	e6c8e2f6d3338c148fd8141114dfc7f2	6108	validated
-ce064514-d2ca-4554-b2c0-3fa4b164d9cd	ce064514-d2ca-4554-b2c0-3fa4b164d9cd/mdanderson.org_CESC.MDA_RPPA_Core.protein_expression.Level_3.AD09DC41-D11F-40EC-BEDA-17B761E52DC8.txt	dc373300fac2178ddaa70917cce951a1	5794	validated
+18ab2b5d-819c-46e9-8163-5007a7e03d2d	18ab2b5d-819c-46e9-8163-5007a7e03d2d/5ada4ad2-e05c-4046-a31c-f3678c78f902.htseq.counts.gz	d4bf744c62237ab58d956a4dc7b0f19b	247504	validated
+a1aeac31-a3e0-45e9-9068-f7239e7b6059	a1aeac31-a3e0-45e9-9068-f7239e7b6059/d6cd4231-04ff-4cca-ba8d-89abe6bec9b0.htseq.counts.gz	21e671f6c6c9da5fe46d1fa435c55d52	248361	validated
+d58df7ae-9c0b-4430-be09-8fd92cd8db9f	d58df7ae-9c0b-4430-be09-8fd92cd8db9f/1777294b-0012-4cfb-8749-d94f22b4ca75.htseq.counts.gz	a631e19f9c49d6e9d5257e7d0e5605cf	247676	validated
+dc27152a-7bc4-429b-b545-78710dc15542	dc27152a-7bc4-429b-b545-78710dc15542/2a9807f5-03b5-4cab-93d1-9e34e089412b.htseq.counts.gz	c22719f7b2843f9ca6af88b2766c6806	251620	validated
+dd915956-c418-455c-a792-1d15ffcba4f1	dd915956-c418-455c-a792-1d15ffcba4f1/08ede229-363e-49f4-951f-95509ec3c604.htseq.counts.gz	a905d3430bc3601cb88124dcb6b58ae1	243094	validated
+f08f6d1c-a80e-4170-b062-2f527765b08f	f08f6d1c-a80e-4170-b062-2f527765b08f/78bab4b6-28ea-4933-b488-295f8ff3ce58.htseq.counts.gz	8ec61cb93a1eb21f4afb112896513ad9	246202	validated
+f3d9e05d-e841-4427-98cd-bfbde95031b6	f3d9e05d-e841-4427-98cd-bfbde95031b6/0c94149a-f877-4be6-a5a5-1f78c2e5255a.htseq.counts.gz	4136de8003a6eba2358f1b74b065011d	241742	validated
