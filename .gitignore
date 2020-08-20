@@ -10,3 +10,6 @@ data_retrieval/MANIFEST.txt
 # Developer-specific files
 dev_paths.txt
 *.png
+
+# VS Code
+.vscode

@@ -5,6 +5,7 @@ import sys
 all_present = True
 cervical_dir = "unified_cervical_data"
 matrisome_dir = "matrisome"
+cancer_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
 
 
 dev_paths_file = "dev_paths.txt"
@@ -25,18 +26,33 @@ with open("dev_paths.txt") as f:
     dirs = tuple(fn.strip() for fn in f.readlines())
     data_dir, analysis_dir, figures_dir = dirs
 
-# Check existence of cervical cancer data
-if not os.path.exists(f"{data_dir}/{cervical_dir}/{coldata_file}"):
-    print(f"[FAILURE] Could not find: {data_dir}/{cervical_dir}/{coldata_file}")
-    all_present = False
-else:
-    print(f"[SUCCESS] Found: {data_dir}/{cervical_dir}/{coldata_file}")
+# # Check existence of cervical cancer data
+# if not os.path.exists(f"{data_dir}/{cervical_dir}/{coldata_file}"):
+#     print(f"[FAILURE] Could not find: {data_dir}/{cervical_dir}/{coldata_file}")
+#     all_present = False
+# else:
+#     print(f"[SUCCESS] Found: {data_dir}/{cervical_dir}/{coldata_file}")
 
-if not os.path.exists(f"{data_dir}/{cervical_dir}/{counts_file}"):
-    print(f"[FAILURE] Could not find: {data_dir}/{cervical_dir}/{counts_file}")
-    all_present = False
-else:
-    print(f"[SUCCESS] Found: {data_dir}/{cervical_dir}/{counts_file}")
+# if not os.path.exists(f"{data_dir}/{cervical_dir}/{counts_file}"):
+#     print(f"[FAILURE] Could not find: {data_dir}/{cervical_dir}/{counts_file}")
+#     all_present = False
+# else:
+#     print(f"[SUCCESS] Found: {data_dir}/{cervical_dir}/{counts_file}")
+
+# Check existence of cancer data
+for dset in cancer_dsets:
+    if not os.path.exists(f"{data_dir}/{dset}/{coldata_file}"):
+        print(f"[FAILURE] Could not find: {data_dir}/{dset}/{coldata_file}")
+        all_present = False
+    else:
+        print(f"[SUCCESS] Found: {data_dir}/{dset}/{coldata_file}")
+
+    if not os.path.exists(f"{data_dir}/{dset}/{counts_file}"):
+        print(f"[FAILURE] Could not find: {data_dir}/{dset}/{counts_file}")
+        all_present = False
+    else:
+        print(f"[SUCCESS] Found: {data_dir}/{dset}/{counts_file}")
+
 
 # Check existence of matrisome data
 if not os.path.exists(f"{data_dir}/{matrisome_dir}/{matrisome_masterlist_file}"):
