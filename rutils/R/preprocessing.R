@@ -42,3 +42,16 @@ load_RSE_objects <- function(dir, projects, prefixes) {
     }
     return(data_ls)
 }
+
+
+to_one_hot <- function(df, col) {
+    one_hot <- model.matrix(
+        as.formula(paste0("~ ", col, " - 1")),    # We do not want the intercept
+        model.frame(~ ., df[col], na.action = na.pass)
+    )
+    # Don't want white space
+    colnames(one_hot) <- gsub(" ", "_", colnames(one_hot))
+    # model.matrix() will prepend original column name to each one-hot column
+    colnames(one_hot) <- gsub(col, paste0(col, "_"), colnames(one_hot))
+    return(tibble::as_tibble(one_hot))
+}
