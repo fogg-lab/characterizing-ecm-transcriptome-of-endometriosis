@@ -44,6 +44,18 @@ load_RSE_objects <- function(dir, projects, prefixes) {
 }
 
 
+load_survival_df <- function(survival_data_path, event_code) {
+    survival_df <- read_tsv(survival_data_path) %>%
+        mutate(vital_status_num = case_when(
+            vital_status == "Dead" ~ event_code[["Dead"]],
+            vital_status == "Alive" ~ event_code[["Alive"]]
+        )) %>%
+        dplyr::select(sample_name, vital_status_num, everything(), -vital_status) %>%
+        dplyr::rename(vital_status = vital_status_num)
+    return(survival_df)
+}
+
+
 to_one_hot <- function(df, col) {
     one_hot <- model.matrix(
         as.formula(paste0("~ ", col, " - 1")),    # We do not want the intercept
