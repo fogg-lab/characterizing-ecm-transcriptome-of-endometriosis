@@ -10,6 +10,18 @@ load_matrisome_df <- function(matrisome_list_file) {
 }
 
 
+load_survival_df <- function(survival_data_file, event_code) {
+    survival_df <- read_tsv(survival_data_file) %>%
+        mutate(vital_status_num = case_when(
+            vital_status == "Dead" ~ event_code[["Dead"]],
+            vital_status == "Alive" ~ event_code[["Alive"]]
+        )) %>%
+        dplyr::select(sample_name, vital_status_num, everything(), -vital_status) %>%
+        dplyr::rename(vital_status = vital_status_num)
+    return(survival_df)
+}
+
+
 load_and_combine_count_matrix_data <- function(count_files, coldata_files, count_join_symbols) {
     count_df_ls <- purrr::map(.x = count_files, .f = readr::read_tsv)
     coldata_df_ls <- purrr::map(.x = coldata_files, .f = readr::read_tsv)
@@ -41,18 +53,6 @@ load_RSE_objects <- function(dir, projects, prefixes) {
         data_ls[[projects[i]]] <- loadHDF5SummarizedExperiment(dir = dir, prefix = prefixes[i])
     }
     return(data_ls)
-}
-
-
-load_survival_df <- function(survival_data_path, event_code) {
-    survival_df <- read_tsv(survival_data_path) %>%
-        mutate(vital_status_num = case_when(
-            vital_status == "Dead" ~ event_code[["Dead"]],
-            vital_status == "Alive" ~ event_code[["Alive"]]
-        )) %>%
-        dplyr::select(sample_name, vital_status_num, everything(), -vital_status) %>%
-        dplyr::rename(vital_status = vital_status_num)
-    return(survival_df)
 }
 
 
