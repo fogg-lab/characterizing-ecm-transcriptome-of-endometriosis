@@ -67,3 +67,54 @@ to_one_hot <- function(df, col) {
     colnames(one_hot) <- gsub(col, paste0(col, "_"), colnames(one_hot))
     return(tibble::as_tibble(one_hot))
 }
+
+
+get_unified_group_samples <- function(counts_df, coldata_df, sample_group) {
+    if (sample_group == "GTEX") {
+        group_samples <- (coldata_df %>%
+            dplyr::filter(data_source == "GTEx"))$sample_name
+    }
+    else if (sample_group == "TCGA_healthy") {
+        group_samples <- (coldata_df %>%
+            dplyr::filter(condition == "healthy" & data_source == "TCGA"))$sample_name
+    }
+    else if (sample_group == "TCGA_tumor") {
+        group_samples <- (coldata_df %>%
+            dplyr::filter(condition == "tumor"))$sample_name
+    }
+    
+    return(counts_df %>% dplyr::select("geneID", all_of(group_samples)))
+}
+
+
+get_unified_thresh_results <- function(group_df, thresh, group_name) {
+    over_thresh_str <- paste0(group_name, "_over_thresh")
+    over_thresh_prop_str <- paste0(group_name, "_over_thresh_prop")
+
+    res_df <- group_df %>%
+        mutate(over_thresh = rowSums(. [, -1] > thresh)) %>%
+        mutate(over_thresh_prop = over_thresh / (ncol(.) - 2)) %>%
+        dplyr::rename(!!over_thresh_str := over_thresh) %>%
+        dplyr::rename(!!over_thresh_prop_str := over_thresh_prop) %>%
+        dplyr::select(matches(c("geneID", over_thresh_str, over_thresh_prop_str)))
+    return(res_df)
+}
+
+
+get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_names, thresh) {
+    df_list <- list()
+    for (gn in group_names) {
+        group_counts_df <- get_unified_group_samples(counts_df, coldata_df, gn)
+        thresh_res_df <- get_unified_thresh_results(group_counts_df, thresh, gn)
+        df_list[[gn]] <- thresh_res_df
+    }
+    final_df <- df_list %>%
+        purrr::reduce(inner_join, by = "geneID") %>%
+        mutate(
+            tot_over_thresh = rowSums(select(., paste0(group_names, "_over_thresh"))),
+            tot_over_thresh_prop = tot_over_thresh / (ncol(counts_df) - 1)    # subtract 1 because we assume gene names is a column
+        )
+    return(final_df)
+}
+
+
