@@ -40,10 +40,42 @@ balanced_group_sample <- function(counts, coldata, centroids, groups, n, group_c
         centroid <- centroids[[group]]
         res <- find_n_closest(group_counts, centroid, n, sample_col) %>%
             mutate("group" = group)
-        print(dim(res))
         samples[[group]] <- res
     }
     return(bind_rows(samples) %>% dplyr::arrange_at(sample_col))
+}
+
+
+get_hm_dfs <- function(counts_df, coldata_df, hm_sample_meta_df, drop_low_sd = TRUE, eps = 1e-6) {
+    hm_sample_counts_df <- counts_df[, c("external_gene_name", hm_sample_meta_df$sample_name)] %>%
+        column_to_rownames(var = "external_gene_name")
+    hm_sample_coldata_df <- coldata_df %>%
+        dplyr::filter(sample_name %in% hm_sample_meta_df$sample_name) %>%
+        arrange(match(sample_name, hm_sample_meta_df$sample_name)) %>%
+        column_to_rownames(var = "sample_name") # Heatmap needs row names
+
+    if (drop_low_sd) {
+        gene_sd_mask <- rowSds(as.matrix(hm_sample_counts_df)) > eps
+        hm_sample_counts_df <- hm_sample_counts_df[gene_sd_mask, ]
+    }
+
+    hm_sample_ls <- list(
+        coldata = hm_sample_coldata_df,
+        counts = hm_sample_counts_df
+    )
+    stopifnot(all(colnames(hm_sample_counts_df) == rownames(hm_sample_coldata_df)))
+    return(hm_sample_ls)
+}
+
+
+get_hm_clusters <- function(counts_df, col_cor = "spearman", row_cor = "pearson", col_metric = "complete", row_metric = "complete") {
+    col_dist <- as.dist(1 - cor(as.matrix(counts_df), method = col_cor))
+    row_dist <- as.dist(1 - cor(t(as.matrix(counts_df)), method = row_cor))
+
+    return(list(
+        col = hclust(col_dist, method = col_metric),
+        row = hclust(row_dist, method = row_metric)
+    ))
 }
 
 
