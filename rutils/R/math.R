@@ -30,3 +30,8 @@ get_group_centroids <- function(counts, coldata, groups, group_col, sample_col) 
     }
     return(tibble::as_tibble(centroids))
 }
+
+
+count_pca_results <- function() {
+    return()
+}
