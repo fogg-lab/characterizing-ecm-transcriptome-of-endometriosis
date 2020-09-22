@@ -32,6 +32,26 @@ get_group_centroids <- function(counts, coldata, groups, group_col, sample_col) 
 }
 
 
-count_pca_results <- function() {
-    return()
+colwise_cor_test <- function(df, indep_vars, dep_var, var = "var", method = "pearson") {
+    cors <- c()
+    pvals <- c()
+    ns <- c()
+    for (iv in indep_vars) {
+        ct_res <- cor.test(df[[iv]], df[[dep_var]], method = method)
+        cors <- c(cors, ct_res$estimate[[1]])
+        pvals <- c(pvals, ct_res$p.value[[1]])
+        ns <- c(ns, length(df[[iv]]))
+    }
+    return(
+        tibble(!!var := indep_vars, "cor" = cors, "pval" = pvals, "n" = ns)
+    )
+}
+
+
+# Source: Page-Gould, Elizabeth. (2015). Re: What is the formula to calculate the critical value of correlation?. Retrieved from: https://www.researchgate.net/post/What_is_the_formula_to_calculate_the_critical_value_of_correlation/558f05c76307d9c3488b4601/citation/download. 
+critical_r <- function(n, alpha = .05) {
+  df <- n - 2
+  critical_t <- qt(alpha / 2, df, lower.tail = FALSE)
+  critical_r <- sqrt((critical_t ^ 2) / ((critical_t ^ 2) + df))
+  return(critical_r)
 }
