@@ -1,0 +1,8 @@
+param	param_value
+loss	huber
+learning_rate	0.00777188574766092
+n_estimators	100
+max_depth	5
+max_features	auto
+alpha	0.5404767839301445
+loss_achieved	481.81838215113396
