@@ -1,6 +1,7 @@
 import pandas as pd
 import re
-from typing import Dict, List
+from typing import Dict, List, Tuple, Optional
+from numpy.random import RandomState
 
 
 FIGO_MAP_DF = pd.DataFrame({
@@ -44,7 +45,7 @@ def transpose_df(df: pd.DataFrame, future_colname_col: str, previous_colname_col
     return df_t
 
 
-def decode_figo_stage(df, to="num"):
+def decode_figo_stage(df: pd.DataFrame, to="num") -> pd.DataFrame:
     if to[0] == "n":
         drop_col = "figo_chr"
     elif to[0] == "c":
@@ -55,3 +56,14 @@ def decode_figo_stage(df, to="num"):
             .drop(["figo_stage", "figo_stage_major_rn", "roman_num", drop_col], axis=1)
     )
     return new_df
+
+
+def shuffle_data(df: pd.DataFrame, rand: RandomState, seed: Optional[int]) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    # If seed is provided, seed is set before shuffling
+    if seed:
+        rand.seed(seed)
+    # Assumes index 0 is the label index
+    shuffled_df = df.sample(frac=1, random_state=rand)
+    x_df = shuffled_df.iloc[:, 1:]
+    y_df = shuffled_df.iloc[:, [0]]
+    return x_df, y_df
