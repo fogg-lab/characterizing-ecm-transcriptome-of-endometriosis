@@ -1,0 +1,7 @@
+param	param_value
+kernel	rbf
+C	10.0
+gamma	0.001
+degree	1
+coef0	-1.0
+loss_achieved	-0.45597620553059903

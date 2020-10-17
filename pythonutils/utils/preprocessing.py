@@ -11,7 +11,7 @@ FIGO_MAP_DF = pd.DataFrame({
 })
 
 
-def cols_to_front(df: pd.DataFrame, cols: List) -> List:
+def cols_to_front(df: pd.DataFrame, cols: List) -> pd.DataFrame:
     everything_else = df.columns.difference(cols, sort=False).tolist()
     return df.reindex(columns=cols + everything_else)
 
@@ -58,10 +58,7 @@ def decode_figo_stage(df: pd.DataFrame, to="num") -> pd.DataFrame:
     return new_df
 
 
-def shuffle_data(df: pd.DataFrame, rand: RandomState, seed: Optional[int]) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    # If seed is provided, seed is set before shuffling
-    if seed:
-        rand.seed(seed)
+def shuffle_data(df: pd.DataFrame, rand: RandomState) -> Tuple[pd.DataFrame, pd.DataFrame]:
     # Assumes index 0 is the label index
     shuffled_df = df.sample(frac=1, random_state=rand)
     x_df = shuffled_df.iloc[:, 1:]
