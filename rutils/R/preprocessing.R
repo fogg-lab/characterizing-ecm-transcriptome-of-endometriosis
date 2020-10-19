@@ -148,5 +148,3 @@ get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_name
         )
     return(final_df)
 }
-
-
