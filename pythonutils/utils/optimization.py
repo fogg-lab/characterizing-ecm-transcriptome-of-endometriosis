@@ -13,31 +13,25 @@ scoring_metrics = {
 }
 
 
-# def save_callback(res: OptimizeResult, dest: str, sep: str = "\t") -> None:
-#     # Does this model correspond with the best score seen so far?
-#     if res.func_vals[-1] == res.fun:
-#         h_param_df = pd.DataFrame({
-#             "param": res.space.dimension_names + ["loss_achieved"],
-#             "param_value": res.x + [res.fun]
-#         })
-#         h_param_df.to_csv(dest, sep=sep, index=False)
-
-
-def save_callback(res: OptimizeResult, dest: str, sep: str = "\t") -> None:
+def save_callback(res: OptimizeResult, dest: str, n: int = 5, sep: str = "\t") -> None:
     # Hyper-parameters from most recent model
     new_h_param_df = pd.DataFrame(
         columns=res.space.dimension_names + ["loss_achieved"],
-        data=[res.x + [res.func_vals[-1]]]
+        # data=[res.x + [res.func_vals[-1]]]
+        data=[res.x_iters[-1] + [res.func_vals[-1]]]
     )
     
     try:
         # Existing optimal hyper-parameters
         h_param_df = pd.read_csv(dest, sep=sep)
         
-        # Not yet 5 models? Add the new one
-        if h_param_df.shape[0] < 5:
+        # Are all of the hyper-parameters for the newest model already here?
+        if redundant_h_params(new_h_param_df, h_param_df):
+            print("*****redundant*****")
+        # Not yet n models? Add the new one
+        elif h_param_df.shape[0] < n:
             h_param_df = pd.concat([h_param_df, new_h_param_df], axis=0)
-        # New model better than the worst of previous 5 best? Replace it
+        # New model better than the worst of previous n best? Replace it
         elif res.func_vals[-1] < h_param_df.loss_achieved.max():
             h_param_df.iloc[[h_param_df.loss_achieved.argmax()]] = new_h_param_df.values
     except FileNotFoundError:
@@ -45,6 +39,18 @@ def save_callback(res: OptimizeResult, dest: str, sep: str = "\t") -> None:
         h_param_df = new_h_param_df
     
     h_param_df.to_csv(dest, sep=sep, index=False)
+
+
+def redundant_h_params(new_h_params_df: pd.DataFrame, old_h_params_df: pd.DataFrame) -> bool:
+    # Are there repeats?
+    # We ignore "loss_achieved" because this may be stochastic. Identical
+    # hyper-parameters can yield different loss.
+    res_df = pd.merge(
+        new_h_params_df.drop("loss_achieved", axis=1),
+        old_h_params_df.drop("loss_achieved", axis=1),
+        on=list(new_h_params_df.columns[:-1])
+    )
+    return res_df.shape[0] > 0
 
 
 def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.DataFrame, metric: str, k: int = 5, random_state: Optional[RandomState] = None, n_repeats: int = 11) -> Tuple[List, np.ndarray]:
