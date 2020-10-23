@@ -53,7 +53,7 @@ def redundant_h_params(new_h_params_df: pd.DataFrame, old_h_params_df: pd.DataFr
     return res_df.shape[0] > 0
 
 
-def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.DataFrame, metric: str, k: int = 5, random_state: Optional[RandomState] = None, n_repeats: int = 11) -> Tuple[List, np.ndarray]:
+def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.DataFrame, metric: str, k: int = 5, random_state: Optional[RandomState] = None, n_repeats: int = 11, to_array: bool = True) -> Tuple[List, np.ndarray]:
     metric_fun = scoring_metrics[metric]
 
     kf = KFold(n_splits=k)
@@ -61,10 +61,21 @@ def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.Da
     ref_scores = []
 
     for train_idx, test_idx in kf.split(x_df):
+        if to_array:
+            y_train = y_df.iloc[train_idx].values.squeeze()
+            y_test = y_df.iloc[test_idx].values.squeeze()
+            x_train = x_df.iloc[train_idx].values
+            x_test = x_df.iloc[test_idx].values
+        else:
+            y_train = y_df.iloc[train_idx]
+            y_test = y_df.iloc[test_idx]
+            x_train = x_df.iloc[train_idx]
+            x_test = x_df.iloc[test_idx]
+
         # Train/retrain from scratch
-        estimator.fit(x_df.iloc[train_idx], y_df.iloc[train_idx])
-        result = permutation_importance(estimator, x_df.iloc[test_idx], y_df.iloc[test_idx], scoring=metric, n_jobs=-1, n_repeats=n_repeats, random_state=random_state)
-        yhat = estimator.predict(x_df.iloc[test_idx])
-        ref_scores.append(metric_fun(y_df.iloc[test_idx].values, yhat))
+        estimator.fit(x_train, y_train)
+        result = permutation_importance(estimator, x_test, y_test, scoring=metric, n_jobs=-1, n_repeats=n_repeats, random_state=random_state)
+        yhat = estimator.predict(x_test)
+        ref_scores.append(metric_fun(y_test, yhat))
         results.append(result)
     return results, np.array(ref_scores)
