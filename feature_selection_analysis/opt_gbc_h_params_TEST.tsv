@@ -1,6 +1,0 @@
-param	param_value
-learning_rate	0.1
-n_estimators	773
-max_depth	2
-max_features	sqrt
-loss_achieved	-0.5072895537907239

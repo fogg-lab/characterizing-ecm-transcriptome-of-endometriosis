@@ -1,8 +1,0 @@
-param	param_value
-kernel	rbf
-C	0.9078892419432866
-epsilon	0.07319805948147146
-gamma	0.001
-degree	1
-coef0	1.0
-loss_achieved	497.0511472819151

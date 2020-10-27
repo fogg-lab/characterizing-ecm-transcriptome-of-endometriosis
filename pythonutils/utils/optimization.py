@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import OptimizeResult
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, explained_variance_score
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.inspection import permutation_importance
 from numpy.random import RandomState
@@ -9,7 +9,8 @@ from typing import Optional, Tuple, List
 
 
 scoring_metrics = {
-    "neg_mean_absolute_error": lambda y_true, y_pred: -mean_absolute_error(y_true, y_pred)
+    "neg_mean_absolute_error": lambda y_true, y_pred: -mean_absolute_error(y_true, y_pred),
+    "explained_variance": explained_variance_score
 }
 
 
@@ -17,7 +18,6 @@ def save_callback(res: OptimizeResult, dest: str, n: int = 5, sep: str = "\t") -
     # Hyper-parameters from most recent model
     new_h_param_df = pd.DataFrame(
         columns=res.space.dimension_names + ["loss_achieved"],
-        # data=[res.x + [res.func_vals[-1]]]
         data=[res.x_iters[-1] + [res.func_vals[-1]]]
     )
     
@@ -25,11 +25,11 @@ def save_callback(res: OptimizeResult, dest: str, n: int = 5, sep: str = "\t") -
         # Existing optimal hyper-parameters
         h_param_df = pd.read_csv(dest, sep=sep)
         
-        # Are all of the hyper-parameters for the newest model already here?
-        if redundant_h_params(new_h_param_df, h_param_df):
-            print("*****redundant*****")
+        # # Are all of the hyper-parameters for the newest model already here?
+        # if redundant_h_params(new_h_param_df, h_param_df):
+        #     print("*****redundant*****")
         # Not yet n models? Add the new one
-        elif h_param_df.shape[0] < n:
+        if h_param_df.shape[0] < n:
             h_param_df = pd.concat([h_param_df, new_h_param_df], axis=0)
         # New model better than the worst of previous n best? Replace it
         elif res.func_vals[-1] < h_param_df.loss_achieved.max():
