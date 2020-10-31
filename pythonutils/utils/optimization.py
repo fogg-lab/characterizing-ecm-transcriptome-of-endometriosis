@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import OptimizeResult
-from sklearn.metrics import mean_absolute_error, explained_variance_score
+from sklearn.metrics import mean_absolute_error, explained_variance_score, f1_score
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.inspection import permutation_importance
 from numpy.random import RandomState
@@ -10,7 +10,8 @@ from typing import Optional, Tuple, List
 
 scoring_metrics = {
     "neg_mean_absolute_error": lambda y_true, y_pred: -mean_absolute_error(y_true, y_pred),
-    "explained_variance": explained_variance_score
+    "explained_variance": explained_variance_score,
+    "f1_weighted": lambda y_true, y_pred: f1_score(y_true, y_pred, average="weighted")
 }
 
 
@@ -67,8 +68,8 @@ def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.Da
             x_train = x_df.iloc[train_idx].values
             x_test = x_df.iloc[test_idx].values
         else:
-            y_train = y_df.iloc[train_idx]
-            y_test = y_df.iloc[test_idx]
+            y_train = y_df.iloc[train_idx].values.squeeze()
+            y_test = y_df.iloc[test_idx].values.squeeze()
             x_train = x_df.iloc[train_idx]
             x_test = x_df.iloc[test_idx]
 
@@ -79,3 +80,12 @@ def cv_permutation_importance(estimator: object, x_df: pd.DataFrame, y_df: pd.Da
         ref_scores.append(metric_fun(y_test, yhat))
         results.append(result)
     return results, np.array(ref_scores)
+
+
+def mc_classification_baseline(y: np.ndarray, labels: np.ndarray, weights: np.ndarray, metric: str, n: int = 11) -> np.ndarray:
+    scores = []
+    for _ in range(n):
+        mc_yhat = np.random.choice(labels, size=y.shape[0], p = weights)
+        scores.append(metric(y, mc_yhat))
+    return np.array(scores)
+
