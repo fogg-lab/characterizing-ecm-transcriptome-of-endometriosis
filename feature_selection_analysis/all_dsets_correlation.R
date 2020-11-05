@@ -41,7 +41,7 @@ for (dset_idx in 1:3) {
         "survival_time",
         v = "geneID"
     )
-    
+
     # Save results
     write_tsv(cor_test_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))
 }
