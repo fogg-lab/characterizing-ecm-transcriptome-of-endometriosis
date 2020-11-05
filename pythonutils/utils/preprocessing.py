@@ -26,7 +26,9 @@ def load_matrisome_df(matrisome_list_file: str) -> pd.DataFrame:
 def load_survival_df(survival_data_file: str, event_code: Dict) -> pd.DataFrame:
     survival_df = pd.read_csv(survival_data_file, sep = '\t')
     survival_df = (
-        survival_df.assign(vital_status_num = survival_df.vital_status.map(lambda x: event_code[x]))
+        survival_df.pipe(lambda df: df[df.vital_status.isin(event_code.keys())])    # Vital status may not be available
+            # .assign(vital_status_num = survival_df.vital_status.map(lambda x: event_code[x]))
+            .pipe(lambda df: df.assign(vital_status_num = df.vital_status.map(lambda x: event_code[x])))
             .drop(["vital_status"], axis=1)
             .rename({"vital_status_num": "vital_status"}, axis = 1)
             .pipe(cols_to_front, ["sample_name", "survival_time", "vital_status"])
