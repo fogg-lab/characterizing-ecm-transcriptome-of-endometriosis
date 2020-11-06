@@ -2,11 +2,8 @@ import pandas as pd
 import numpy as np
 import os
 from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.pipeline import make_pipeline, Pipeline
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_score, KFold
-from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, explained_variance_score
+from sklearn.metrics import mean_absolute_error
 from skopt.space import Real, Integer, Categorical
 from skopt import gp_minimize
 
@@ -31,14 +28,7 @@ def objective(h_params, X, y, loss_default, scoring_default, r, verbose=True):
         min_samples_leaf=h_params[5],
         random_state=r
     )
-    return -np.mean(cross_val_score(
-        model,
-        X,
-        y,
-        cv=KFold(n_splits=5),
-        n_jobs=-1,
-        scoring=scoring_default
-    ))
+    return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
 
 
 def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_initial, n_calls, callback_file):
@@ -63,15 +53,12 @@ def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_i
 dirs = dev_conf.get_dev_directories("../dev_paths.txt")
 unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
 matrisome_list = f"{dirs.data_dir}/matrisome/matrisome_hs_masterlist.tsv"
-
 seed = 123
 rand = np.random.RandomState()
-
 event_code = {"Alive": 0, "Dead": 1}
 covariate_cols = ["figo_stage", "age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["vital_status", "survival_time"]
 cat_cols = ["race", "ethnicity", "figo_chr"]
-
 space = [
     Real(1e-3, 1e-1, name="learning_rate"),
     Integer(int(1e2), int(1e3), name="n_estimators"),
@@ -109,17 +96,6 @@ for dset_idx in range(3):
 
     rand.seed(seed)
     x_df, y_df = prep.shuffle_data(joined_df, rand)
-
-    # Get baselines
-    mean_baseline = mean_squared_error(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
-    median_baseline = mean_absolute_error(y_df.values, np.repeat(np.median(y_df.values.squeeze()), y_df.shape[0]))
-    r2_baseline = r2_score(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
-    expl_var_baseline = explained_variance_score(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
-
-    print(f"L2 baseline: {mean_baseline}")
-    print(f"L1 baseline: {median_baseline}")
-    print(f"R2 baseline: {r2_baseline}")
-    print(f"explained variance baseline: {expl_var_baseline}")
 
     # Optimize models
     run_optimization(
