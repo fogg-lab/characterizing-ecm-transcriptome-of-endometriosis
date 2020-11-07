@@ -13,7 +13,6 @@ import utils.optimization as opt
 # Define constants and load data
 dirs = dev_conf.get_dev_directories("../dev_paths.txt")
 unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
-matrisome_list = f"{dirs.data_dir}/matrisome/matrisome_hs_masterlist.tsv"
 seed = 123
 rand = np.random.RandomState()
 

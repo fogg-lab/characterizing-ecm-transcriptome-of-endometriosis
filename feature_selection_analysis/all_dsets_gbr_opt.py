@@ -52,7 +52,6 @@ def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_i
 # Define constants and load data
 dirs = dev_conf.get_dev_directories("../dev_paths.txt")
 unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
-matrisome_list = f"{dirs.data_dir}/matrisome/matrisome_hs_masterlist.tsv"
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
@@ -70,6 +69,8 @@ space = [
 n_initial = 10 * (len(space))
 n_calls = 50 * (len(space))
 
+
+# Train models
 for dset_idx in range(3):
     # Load and filter survival data
     survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)

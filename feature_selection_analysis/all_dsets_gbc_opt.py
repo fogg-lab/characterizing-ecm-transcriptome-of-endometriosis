@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import cross_val_score, KFold
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, explained_variance_score
+from sklearn.metrics import f1_score
 from skopt.space import Real, Integer, Categorical
 from skopt import gp_minimize
 
@@ -13,30 +13,30 @@ import utils.optimization as opt
 
 
 # Helper functions
-def objective(h_params, X, y, scoring_default, r, verbose=True):
+def objective(h_params, X, y, loss_default, scoring_default, r, verbose=True):
     if verbose:
         print(h_params)
-    model = RandomForestRegressor(
-        n_estimators=h_params[0],
-        max_depth=h_params[1],
-        max_features=h_params[2],
-        min_samples_split=h_params[3],
-        min_samples_leaf=h_params[4],
-        bootstrap=h_params[5],
-        n_jobs=-1,
+    model = GradientBoostingClassifier(
+        loss=loss_default,
+        learning_rate=h_params[0],
+        n_estimators=h_params[1],
+        max_depth=h_params[2],
+        max_features=h_params[3],
+        min_samples_split=h_params[4],
+        min_samples_leaf=h_params[5],
         random_state=r
     )
     return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
 
 
-def run_optimization(x_df, y_df, space, scoring_default, rand, n_initial, n_calls, callback_file):
+def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_initial, n_calls, callback_file):
     try:
         os.remove(callback_file)
     except OSError:
         pass
 
     res = gp_minimize(
-        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), scoring_default, rand),
+        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), loss_default, scoring_default, rand),
         space,
         verbose=True,
         random_state=rand,
@@ -53,16 +53,16 @@ unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uteri
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
-covariate_cols = ["figo_stage", "age_at_diagnosis", "race", "ethnicity"]
-dep_cols = ["vital_status", "survival_time"]
-cat_cols = ["race", "ethnicity", "figo_chr"]
+covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
+dep_cols = ["figo_stage"]
+cat_cols = ["race", "ethnicity"]
 space = [
+    Real(1e-3, 1e-1, name="learning_rate"),
     Integer(int(1e2), int(1e3), name="n_estimators"),
-    Integer(int(10), int(100), name="max_depth"),
+    Integer(2, 5, name="max_depth"),
     Categorical(["auto", "sqrt", "log2"], name="max_features"),
-    Integer(int(2), int(4), name="min_samples_split"),
-    Integer(int(1), int(3), name="min_samples_leaf"),
-    Categorical([True, False], name="bootstrap")
+    Integer(int(2), int(6), name="min_samples_split"),
+    Integer(int(1), int(3), name="min_samples_leaf")
 ]
 n_initial = 10 * len(space)
 n_calls = 50 * len(space)
@@ -73,11 +73,10 @@ for dset_idx in range(3):
     # Load and filter survival data
     survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
     filtered_survival_df = (
-        prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
-            .query("vital_status == 1")
-            .drop(["vital_status"], axis=1)
+        prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
             .pipe(pd.get_dummies, columns=cat_cols)
             .reset_index(drop = True)
+            .pipe(prep.cols_to_front, ["sample_name", "figo_num"])
     )
     filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
 
@@ -98,13 +97,8 @@ for dset_idx in range(3):
 
     # Optimize models
     run_optimization(
-        x_df, y_df, space, "explained_variance", rand, n_initial, n_calls,
-        f"{unified_dsets[dset_idx]}_opt_rfr_h_params_explained_variance.tsv"
-    )
-
-    run_optimization(
-        x_df, y_df, space, "neg_mean_absolute_error", rand, n_initial, n_calls,
-        f"{unified_dsets[dset_idx]}_opt_rfr_h_params_neg_mean_absolute_error.tsv"
+        x_df, y_df, space, "deviance", "f1_weighted", rand, n_initial, n_calls,
+        f"{unified_dsets[dset_idx]}_opt_gbc_h_params_f1_weighted.tsv"
     )
     
     print(f"Completed dataset: {unified_dsets[dset_idx]}")
