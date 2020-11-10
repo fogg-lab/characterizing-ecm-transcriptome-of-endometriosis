@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, KFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer, TransformedTargetRegressor
 from sklearn.metrics import f1_score
 from skopt.space import Real, Integer, Categorical
 from skopt import gp_minimize
@@ -13,30 +16,35 @@ import utils.optimization as opt
 
 
 # Helper functions
-def objective(h_params, X, y, scoring_default, r, verbose=True):
+def objective(h_params, X, y, penalty_default, scoring_default, r, c_transformer, verbose=True):
     if verbose:
         print(h_params)
-    model = RandomForestClassifier(
-        n_estimators=h_params[0],
-        max_depth=h_params[1],
-        max_features=h_params[2],
-        min_samples_split=h_params[3],
-        min_samples_leaf=h_params[4],
-        bootstrap=h_params[5],
-        n_jobs=-1,
-        random_state=r
+
+    model = make_pipeline(
+        c_transformer,
+        LogisticRegression(
+            C=h_params[0],
+            class_weight=h_params[1],
+            solver=h_params[2],
+            penalty=penalty_default,
+            n_jobs=-1,
+            random_state=r
+        )
     )
     return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
 
 
-def run_optimization(x_df, y_df, space, scoring_default, rand, n_initial, n_calls, callback_file):
+def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, matrisome_genes, n_initial, n_calls, callback_file):
     try:
         os.remove(callback_file)
     except OSError:
         pass
+    c_transformer = ColumnTransformer([
+        ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+    ], remainder="passthrough")
 
     res = gp_minimize(
-        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), scoring_default, rand),
+        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), penalty_default, scoring_default, rand, c_transformer),
         space,
         verbose=True,
         random_state=rand,
@@ -56,16 +64,26 @@ event_code = {"Alive": 0, "Dead": 1}
 covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["figo_stage"]
 cat_cols = ["race", "ethnicity"]
-space = [
-    Integer(int(1e2), int(1e3), name="n_estimators"),
-    Integer(int(10), int(100), name="max_depth"),
-    Categorical(["auto", "sqrt", "log2"], name="max_features"),
-    Integer(int(2), int(4), name="min_samples_split"),
-    Integer(int(1), int(3), name="min_samples_leaf"),
-    Categorical([True, False], name="bootstrap")
+l1_space = [
+    Real(1e-1, 1e1, name="C"),
+    Categorical(["balanced", None], name="class_weight"),
+    Categorical(["liblinear", "saga"], name="solver")
 ]
-n_initial = 10 * len(space)
-n_calls = 50 * len(space)
+
+l2_space = [
+    Real(1e-1, 1e1, name="C"),
+    Categorical(["balanced", None], name="class_weight"),
+    Categorical(["newton-cg", "lbfgs", "sag", "saga"], name="solver")
+]
+
+no_penalty_space = [
+    Real(1e-1, 1e1, name="C"),
+    Categorical(["balanced", None], name="class_weight"),
+    Categorical(["newton-cg", "lbfgs", "sag", "saga"], name="solver")
+]
+
+n_initial = 10 * len(l1_space)
+n_calls = 50 * len(l1_space)
 
 
 # Train models
@@ -95,10 +113,23 @@ for dset_idx in range(3):
     rand.seed(seed)
     x_df, y_df = prep.shuffle_data(joined_df, rand)
 
+    # Prep for running models
+    matrisome_genes = norm_filtered_matrisome_counts_t_df.columns[1:]
+
     # Optimize models
     run_optimization(
-        x_df, y_df, space, "f1_weighted", rand, n_initial, n_calls,
-        f"{unified_dsets[dset_idx]}_opt_rfc_h_params_f1_weighted.tsv"
+        x_df, y_df, l2_space, "l2", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
+        f"{unified_dsets[dset_idx]}_opt_lr_h_params_l2_f1_weighted.tsv"
+    )
+
+    run_optimization(
+        x_df, y_df, l1_space, "l1", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
+        f"{unified_dsets[dset_idx]}_opt_lr_h_params_l1_f1_weighted.tsv"
+    )
+
+    run_optimization(
+        x_df, y_df, no_penalty_space, "none", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
+        f"{unified_dsets[dset_idx]}_opt_lr_h_params_none_f1_weighted.tsv"
     )
 
     print(f"Completed dataset: {unified_dsets[dset_idx]}")
