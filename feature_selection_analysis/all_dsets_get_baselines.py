@@ -23,6 +23,7 @@ covariate_cols = ["figo_stage", "age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["vital_status", "survival_time"]
 cat_cols = ["race", "ethnicity", "figo_chr"]
 
+baseline_reg_df = pd.DataFrame({"baseline": ["L2", "L1", "R2", "explained_variance", "n"]})
 for dset_idx in range(3):
     # Load and filter survival data
     survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
@@ -55,13 +56,19 @@ for dset_idx in range(3):
     median_baseline = mean_absolute_error(y_df.values, np.repeat(np.median(y_df.values.squeeze()), y_df.shape[0]))
     r2_baseline = r2_score(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
     expl_var_baseline = explained_variance_score(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
+    n = y_df.shape[0]
 
     print(f"******* Regression baselines for: {unified_dsets[dset_idx]} *******")
     print(f"L2 baseline: {mean_baseline}")
     print(f"L1 baseline: {median_baseline}")
     print(f"R2 baseline: {r2_baseline}")
     print(f"explained variance baseline: {expl_var_baseline}")
+    print(f"Sample size: {y_df.shape[0]}")
     print()
+    
+    baseline_reg_df[f"{unified_dsets[dset_idx]}"] = np.array([mean_baseline, median_baseline, r2_baseline, expl_var_baseline, n])
+
+baseline_reg_df.to_csv(f"{dirs.analysis_dir}/reg_baselines.tsv", sep="\t", index=False)
 
 
 # Classification baselines

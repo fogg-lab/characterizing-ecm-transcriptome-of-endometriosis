@@ -125,6 +125,9 @@ for dset_idx in range(3):
     )
     ev_gbr_merge_df = merge_perm_results(ev_gbr_perm_res_dfs)
     ev_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_results.tsv", sep="\t", index=False)
+    ev_gbr_mean_ref_scores = np.array(ev_gbr_ref_scores).mean(axis=1)
+    ev_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_gbr_mean_ref_scores)), "ref_score": ev_gbr_mean_ref_scores})
+    ev_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_ref_scores.tsv", sep="\t", index=False)
 
     # GBR (MAE)
     mae_gbr_mean_perm_res, mae_gbr_ref_scores, mae_gbr_perm_res_dfs = collect_feature_perm_results(
@@ -132,6 +135,9 @@ for dset_idx in range(3):
     )
     mae_gbr_merge_df = merge_perm_results(mae_gbr_perm_res_dfs)
     mae_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_results.tsv", sep="\t", index=False)
+    mae_gbr_mean_ref_scores = np.array(mae_gbr_ref_scores).mean(axis=1)
+    mae_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_gbr_mean_ref_scores)), "ref_score": mae_gbr_mean_ref_scores})
+    mae_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_ref_scores.tsv", sep="\t", index=False)
 
     # RFR (EV)
     ev_rfr_mean_perm_res, ev_rfr_ref_scores, ev_rfr_perm_res_dfs = collect_feature_perm_results(
@@ -139,6 +145,9 @@ for dset_idx in range(3):
     )
     ev_rfr_merge_df = merge_perm_results(ev_rfr_perm_res_dfs)
     ev_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_results.tsv", sep="\t", index=False)
+    ev_rfr_mean_ref_scores = np.array(ev_rfr_ref_scores).mean(axis=1)
+    ev_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_rfr_mean_ref_scores)), "ref_score": ev_rfr_mean_ref_scores})
+    ev_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_ref_scores.tsv", sep="\t", index=False)
 
     # RFR (MAE)
     mae_rfr_mean_perm_res, mae_rfr_ref_scores, mae_rfr_perm_res_dfs = collect_feature_perm_results(
@@ -146,5 +155,8 @@ for dset_idx in range(3):
     )
     mae_rfr_merge_df = merge_perm_results(mae_rfr_perm_res_dfs)
     mae_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_results.tsv", sep="\t", index=False)
+    mae_rfr_mean_ref_scores = np.array(mae_rfr_ref_scores).mean(axis=1)
+    mae_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_rfr_mean_ref_scores)), "ref_score": mae_rfr_mean_ref_scores})
+    mae_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_ref_scores.tsv", sep="\t", index=False)
 
     print(f"Completed dataset: {unified_dsets[dset_idx]}")

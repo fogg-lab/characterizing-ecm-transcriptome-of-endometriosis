@@ -18,6 +18,7 @@ figo_map_df <- tibble(
     figo_code = c('1', '2', '3', '4')
 )
 
+cox_null_scores_df <- tibble(score = c("lr_test_pval", "wald_test_pval", "score_test_pval"))
 
 for (dset_idx in 1:3) {
     # Load and filter survival data
@@ -62,6 +63,10 @@ for (dset_idx in 1:3) {
         data = joined_survival_counts_df,
         singular.ok = TRUE
     )
+    res_cox_fit_null <- summary(cox_fit_null)
+    dset <- unified_dsets[dset_idx]
+    cox_null_scores_df <- cox_null_scores_df %>%
+        add_column(!!dset := c(res_cox_fit_null$logtest[["pvalue"]], res_cox_fit_null$waldtest[["pvalue"]], res_cox_fit_null$sctest[["pvalue"]]))
 
     # Fit gene models
     genes_of_interest <- colnames(joined_survival_counts_df %>% dplyr::select(-colnames(filtered_survival_df)))
@@ -100,3 +105,5 @@ for (dset_idx in 1:3) {
     nrow(sig_cox_regression_df %>%
         dplyr::filter(gene_coeff < 0))
 }
+
+write_tsv(cox_null_scores_df, paste0(dirs$analysis_dir, "/", "coxph_null_scores.tsv"))

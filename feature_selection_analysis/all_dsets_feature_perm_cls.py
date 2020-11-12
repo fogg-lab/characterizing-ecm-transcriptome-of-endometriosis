@@ -149,6 +149,9 @@ for dset_idx in range(3):
     )
     l1_lr_merge_df = merge_perm_results(l1_lr_perm_res_dfs)
     l1_lr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_l1_lr_results.tsv", sep="\t", index=False)
+    l1_lr_mean_ref_scores = np.array(l1_lr_ref_scores).mean(axis=1)
+    l1_lr_mean_ref_scores_df = pd.DataFrame({"model": range(len(l1_lr_mean_ref_scores)), "ref_score": l1_lr_mean_ref_scores})
+    l1_lr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_l1_lr_ref_scores.tsv", sep="\t", index=False)
 
     # LR (L2)
     l2_lr_mean_perm_res, l2_lr_ref_scores, l2_lr_perm_res_dfs = collect_feature_perm_results(
@@ -156,6 +159,9 @@ for dset_idx in range(3):
     )
     l2_lr_merge_df = merge_perm_results(l2_lr_perm_res_dfs)
     l2_lr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_l2_lr_results.tsv", sep="\t", index=False)
+    l2_lr_mean_ref_scores = np.array(l2_lr_ref_scores).mean(axis=1)
+    l2_lr_mean_ref_scores_df = pd.DataFrame({"model": range(len(l2_lr_mean_ref_scores)), "ref_score": l2_lr_mean_ref_scores})
+    l2_lr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_l2_lr_ref_scores.tsv", sep="\t", index=False)
 
     # GBC
     gbc_mean_perm_res, gbc_ref_scores, gbc_perm_res_dfs = collect_feature_perm_results(
@@ -163,6 +169,9 @@ for dset_idx in range(3):
     )
     gbc_merge_df = merge_perm_results(gbc_perm_res_dfs)
     gbc_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_gbc_results.tsv", sep="\t", index=False)
+    gbc_mean_ref_scores = np.array(gbc_ref_scores).mean(axis=1)
+    gbc_mean_ref_scores_df = pd.DataFrame({"model": range(len(gbc_mean_ref_scores)), "ref_score": gbc_mean_ref_scores})
+    gbc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_gbc_ref_scores.tsv", sep="\t", index=False)
 
     # RFC
     rfc_mean_perm_res, rfc_ref_scores, rfc_perm_res_dfs = collect_feature_perm_results(
@@ -170,5 +179,9 @@ for dset_idx in range(3):
     )
     rfc_merge_df = merge_perm_results(rfc_perm_res_dfs)
     rfc_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_rfc_results.tsv", sep="\t", index=False)
+    rfc_mean_ref_scores = np.array(rfc_ref_scores).mean(axis=1)
+    rfc_mean_ref_scores_df = pd.DataFrame({"model": range(len(rfc_mean_ref_scores)), "ref_score": rfc_mean_ref_scores})
+    rfc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_rfc_ref_scores.tsv", sep="\t", index=False)
+
 
     print(f"Completed dataset: {unified_dsets[dset_idx]}")
