@@ -55,6 +55,13 @@ if not os.path.exists(analysis_dir):
 else:
     print(f"[SUCCESS] Analysis directory already exists.")
 
+# Check existence of analysis/meta directory
+if not os.path.exists(f"{analysis_dir}/meta"):
+    os.makedirs(f"{analysis_dir}/meta")
+    print(f"[SUCCESS] Created analysis/meta directory: {analysis_dir}/meta")
+else:
+    print(f"[SUCCESS] Analysis meta directory already exists.")
+
 # Check existence of figures directory
 if not os.path.exists(figures_dir):
     os.makedirs(figures_dir)

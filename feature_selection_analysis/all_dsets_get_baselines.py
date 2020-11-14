@@ -63,13 +63,16 @@ for dset_idx in range(3):
     print(f"L1 baseline: {median_baseline}")
     print(f"R2 baseline: {r2_baseline}")
     print(f"explained variance baseline: {expl_var_baseline}")
-    print(f"Sample size: {y_df.shape[0]}")
+    print(f"Sample size: {n}")
     print()
     
     baseline_reg_df[f"{unified_dsets[dset_idx]}"] = np.array([mean_baseline, median_baseline, r2_baseline, expl_var_baseline, n])
 
-baseline_reg_df.to_csv(f"{dirs.analysis_dir}/reg_baselines.tsv", sep="\t", index=False)
-
+baseline_reg_df.to_csv(f"{dirs.analysis_dir}/meta/reg_baselines.tsv", sep="\t", index=False)
+baseline_reg_t_df = prep.transpose_df(
+    baseline_reg_df, "baseline", "dataset"
+)
+baseline_reg_t_df.to_csv(f"{dirs.analysis_dir}/meta/reg_baselines.tsv", sep="\t", index=False)
 
 # Classification baselines
 event_code = {"Alive": 0, "Dead": 1}
@@ -77,6 +80,7 @@ covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["figo_stage"]
 cat_cols = ["race", "ethnicity"]
 
+baseline_cls_df = pd.DataFrame({"baseline": ["f1_weighted_majority", "f1_weighted_MC", "n"]})
 for dset_idx in range(3):
     # Load and filter survival data
     survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
@@ -121,8 +125,17 @@ for dset_idx in range(3):
         metric=lambda y, yhat: f1_score(y, yhat, average="weighted"),
         n=1001
     )
+    n = y_df.shape[0]
 
-    print(f"******* Regression baselines for: {unified_dsets[dset_idx]} *******")
+    print(f"******* Classification baselines for: {unified_dsets[dset_idx]} *******")
     print(f"F1 (weighted) majority guess baseline: {most_frequent_baseline}")
     print(f"F1 (weighted) Monte Carlo baseline: {mc_baseline.mean()}")
+    print(f"Sample size: {n}")
     print()
+
+    baseline_cls_df[f"{unified_dsets[dset_idx]}"] = np.array([most_frequent_baseline, mc_baseline.mean(), n])
+
+baseline_cls_t_df = prep.transpose_df(
+    baseline_cls_df, "baseline", "dataset"
+)
+baseline_cls_t_df.to_csv(f"{dirs.analysis_dir}/meta/cls_baselines.tsv", sep="\t", index=False)

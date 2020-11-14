@@ -148,3 +148,10 @@ get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_name
         )
     return(final_df)
 }
+
+transpose_df <- function(df, future_colnames_col, previous_colnames_col) {
+    temp_df <- as.data.frame(df)
+    rownames(temp_df) <- df[[future_colnames_col]]
+    temp_df <- temp_df %>% dplyr::select(-(!!future_colnames_col))
+    t(temp_df) %>% as_tibble(rownames = previous_colnames_col)
+}

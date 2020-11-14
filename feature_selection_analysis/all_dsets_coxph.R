@@ -18,6 +18,7 @@ figo_map_df <- tibble(
     figo_code = c('1', '2', '3', '4')
 )
 
+
 cox_null_scores_df <- tibble(score = c("lr_test_pval", "wald_test_pval", "score_test_pval"))
 
 for (dset_idx in 1:3) {
@@ -106,4 +107,4 @@ for (dset_idx in 1:3) {
         dplyr::filter(gene_coeff < 0))
 }
 
-write_tsv(cox_null_scores_df, paste0(dirs$analysis_dir, "/", "coxph_null_scores.tsv"))
+write_tsv(cox_null_scores_df %>% rutils::transpose_df("score", "dataset"), paste0(dirs$analysis_dir, "/meta/", "coxph_null_scores.tsv"))
