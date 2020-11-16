@@ -49,7 +49,7 @@ def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_i
     )
 
 
-# Define constants and load data
+# Define constants
 dirs = dev_conf.get_dev_directories("../dev_paths.txt")
 unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
 seed = 123
@@ -70,43 +70,48 @@ n_initial = 10 * (len(space))
 n_calls = 50 * (len(space))
 
 
-# Train models
-for dset_idx in range(3):
-    # Load and filter survival data
-    survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
-    filtered_survival_df = (
-        prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
-            .query("vital_status == 1")
-            .drop(["vital_status"], axis=1)
-            .pipe(pd.get_dummies, columns=cat_cols)
-            .reset_index(drop = True)
-    )
-    filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
+def main():
+    # Train models
+    for dset_idx in range(3):
+        # Load and filter survival data
+        survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
+        filtered_survival_df = (
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
+                .query("vital_status == 1")
+                .drop(["vital_status"], axis=1)
+                .pipe(pd.get_dummies, columns=cat_cols)
+                .reset_index(drop = True)
+        )
+        filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
 
-    # Load normalized matrisome count data
-    norm_matrisome_counts_df = pd.read_csv(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/norm_matrisome_counts.tsv", sep='\t')
-    norm_filtered_matrisome_counts_t_df = prep.transpose_df(
-        norm_matrisome_counts_df[["geneID"] + list(filtered_survival_df.sample_name)], "geneID", "sample_name"
-    )
+        # Load normalized matrisome count data
+        norm_matrisome_counts_df = pd.read_csv(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/norm_matrisome_counts.tsv", sep='\t')
+        norm_filtered_matrisome_counts_t_df = prep.transpose_df(
+            norm_matrisome_counts_df[["geneID"] + list(filtered_survival_df.sample_name)], "geneID", "sample_name"
+        )
 
-    # Combine survival data and normalized count data
-    joined_df = (
-        pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
-            .set_index("sample_name")
-    )
+        # Combine survival data and normalized count data
+        joined_df = (
+            pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
+                .set_index("sample_name")
+        )
 
-    rand.seed(seed)
-    x_df, y_df = prep.shuffle_data(joined_df, rand)
+        rand.seed(seed)
+        x_df, y_df = prep.shuffle_data(joined_df, rand)
 
-    # Optimize models
-    run_optimization(
-        x_df, y_df, space, "ls", "explained_variance", rand, n_initial, n_calls,
-        f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv"
-    )
+        # Optimize models
+        run_optimization(
+            x_df, y_df, space, "ls", "explained_variance", rand, n_initial, n_calls,
+            f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv"
+        )
 
-    run_optimization(
-        x_df, y_df, space, "lad", "neg_mean_absolute_error", rand, n_initial, n_calls,
-        f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv"
-    )
+        run_optimization(
+            x_df, y_df, space, "lad", "neg_mean_absolute_error", rand, n_initial, n_calls,
+            f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv"
+        )
 
-    print(f"Completed dataset: {unified_dsets[dset_idx]}")
+        print(f"Completed dataset: {unified_dsets[dset_idx]}")
+
+
+if __name__ == "__main__":
+    main()

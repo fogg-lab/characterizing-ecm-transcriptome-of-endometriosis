@@ -62,101 +62,106 @@ dep_cols = ["vital_status", "survival_time"]
 cat_cols = ["race", "ethnicity", "figo_chr"]
 
 
-# Train models
-for dset_idx in range(3):
-    # Load and filter survival data
-    survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
-    filtered_survival_df = (
-        prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
-            .query("vital_status == 1")
-            .drop(["vital_status"], axis=1)
-            .pipe(pd.get_dummies, columns=cat_cols)
-            .reset_index(drop = True)
-    )
-    filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
+def main():
+    # Train models
+    for dset_idx in range(3):
+        # Load and filter survival data
+        survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
+        filtered_survival_df = (
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
+                .query("vital_status == 1")
+                .drop(["vital_status"], axis=1)
+                .pipe(pd.get_dummies, columns=cat_cols)
+                .reset_index(drop = True)
+        )
+        filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
 
-    # Load normalized matrisome count data
-    norm_matrisome_counts_df = pd.read_csv(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/norm_matrisome_counts.tsv", sep='\t')
-    norm_filtered_matrisome_counts_t_df = prep.transpose_df(
-        norm_matrisome_counts_df[["geneID"] + list(filtered_survival_df.sample_name)], "geneID", "sample_name"
-    )
+        # Load normalized matrisome count data
+        norm_matrisome_counts_df = pd.read_csv(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/norm_matrisome_counts.tsv", sep='\t')
+        norm_filtered_matrisome_counts_t_df = prep.transpose_df(
+            norm_matrisome_counts_df[["geneID"] + list(filtered_survival_df.sample_name)], "geneID", "sample_name"
+        )
 
-    # Combine survival data and normalized count data
-    joined_df = (
-        pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
-            .set_index("sample_name")
-    )
+        # Combine survival data and normalized count data
+        joined_df = (
+            pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
+                .set_index("sample_name")
+        )
 
-    rand.seed(seed)
-    x_df, y_df = prep.shuffle_data(joined_df, rand)
+        rand.seed(seed)
+        x_df, y_df = prep.shuffle_data(joined_df, rand)
 
-    # Build models
-    ev_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv", sep="\t")
-    ev_gbrs = [
-        GradientBoostingRegressor(
-            **dict(zip(ev_gbr_h_param_df.columns[:-1], ev_gbr_h_param_df.iloc[i, :-1])), loss="ls", random_state=rand
-        ) for i in range(ev_gbr_h_param_df.shape[0])
-    ]
+        # Build models
+        ev_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv", sep="\t")
+        ev_gbrs = [
+            GradientBoostingRegressor(
+                **dict(zip(ev_gbr_h_param_df.columns[:-1], ev_gbr_h_param_df.iloc[i, :-1])), loss="ls", random_state=rand
+            ) for i in range(ev_gbr_h_param_df.shape[0])
+        ]
 
-    mae_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv", sep="\t")
-    mae_gbrs = [
-        GradientBoostingRegressor(
-            **dict(zip(mae_gbr_h_param_df.columns[:-1], mae_gbr_h_param_df.iloc[i, :-1])), loss="lad", random_state=rand
-        ) for i in range(mae_gbr_h_param_df.shape[0])
-    ]
+        mae_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv", sep="\t")
+        mae_gbrs = [
+            GradientBoostingRegressor(
+                **dict(zip(mae_gbr_h_param_df.columns[:-1], mae_gbr_h_param_df.iloc[i, :-1])), loss="lad", random_state=rand
+            ) for i in range(mae_gbr_h_param_df.shape[0])
+        ]
 
-    ev_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_explained_variance.tsv", sep="\t")
-    ev_rfrs = [
-        RandomForestRegressor(
-            **dict(zip(ev_rfr_h_param_df.columns[:-1], ev_rfr_h_param_df.iloc[i, :-1])), random_state=rand
-        ) for i in range(ev_rfr_h_param_df.shape[0])
-    ]
+        ev_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_explained_variance.tsv", sep="\t")
+        ev_rfrs = [
+            RandomForestRegressor(
+                **dict(zip(ev_rfr_h_param_df.columns[:-1], ev_rfr_h_param_df.iloc[i, :-1])), random_state=rand
+            ) for i in range(ev_rfr_h_param_df.shape[0])
+        ]
 
-    mae_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_neg_mean_absolute_error.tsv", sep="\t")
-    mae_rfrs = [
-        RandomForestRegressor(
-            **dict(zip(mae_rfr_h_param_df.columns[:-1], mae_rfr_h_param_df.iloc[i, :-1])), random_state=rand
-        ) for i in range(mae_rfr_h_param_df.shape[0])
-    ]
+        mae_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_neg_mean_absolute_error.tsv", sep="\t")
+        mae_rfrs = [
+            RandomForestRegressor(
+                **dict(zip(mae_rfr_h_param_df.columns[:-1], mae_rfr_h_param_df.iloc[i, :-1])), random_state=rand
+            ) for i in range(mae_rfr_h_param_df.shape[0])
+        ]
 
-    # GBR (EV)
-    ev_gbr_mean_perm_res, ev_gbr_ref_scores, ev_gbr_perm_res_dfs = collect_feature_perm_results(
-        ev_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
-    )
-    ev_gbr_merge_df = merge_perm_results(ev_gbr_perm_res_dfs)
-    ev_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_results.tsv", sep="\t", index=False)
-    ev_gbr_mean_ref_scores = np.array(ev_gbr_ref_scores).mean(axis=1)
-    ev_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_gbr_mean_ref_scores)), "ref_score": ev_gbr_mean_ref_scores})
-    ev_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_ref_scores.tsv", sep="\t", index=False)
+        # GBR (EV)
+        ev_gbr_mean_perm_res, ev_gbr_ref_scores, ev_gbr_perm_res_dfs = collect_feature_perm_results(
+            ev_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
+        )
+        ev_gbr_merge_df = merge_perm_results(ev_gbr_perm_res_dfs)
+        ev_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_results.tsv", sep="\t", index=False)
+        ev_gbr_mean_ref_scores = np.array(ev_gbr_ref_scores).mean(axis=1)
+        ev_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_gbr_mean_ref_scores)), "ref_score": ev_gbr_mean_ref_scores})
+        ev_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_ref_scores.tsv", sep="\t", index=False)
 
-    # GBR (MAE)
-    mae_gbr_mean_perm_res, mae_gbr_ref_scores, mae_gbr_perm_res_dfs = collect_feature_perm_results(
-        mae_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
-    )
-    mae_gbr_merge_df = merge_perm_results(mae_gbr_perm_res_dfs)
-    mae_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_results.tsv", sep="\t", index=False)
-    mae_gbr_mean_ref_scores = np.array(mae_gbr_ref_scores).mean(axis=1)
-    mae_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_gbr_mean_ref_scores)), "ref_score": mae_gbr_mean_ref_scores})
-    mae_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_ref_scores.tsv", sep="\t", index=False)
+        # GBR (MAE)
+        mae_gbr_mean_perm_res, mae_gbr_ref_scores, mae_gbr_perm_res_dfs = collect_feature_perm_results(
+            mae_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
+        )
+        mae_gbr_merge_df = merge_perm_results(mae_gbr_perm_res_dfs)
+        mae_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_results.tsv", sep="\t", index=False)
+        mae_gbr_mean_ref_scores = np.array(mae_gbr_ref_scores).mean(axis=1)
+        mae_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_gbr_mean_ref_scores)), "ref_score": mae_gbr_mean_ref_scores})
+        mae_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_ref_scores.tsv", sep="\t", index=False)
 
-    # RFR (EV)
-    ev_rfr_mean_perm_res, ev_rfr_ref_scores, ev_rfr_perm_res_dfs = collect_feature_perm_results(
-        ev_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
-    )
-    ev_rfr_merge_df = merge_perm_results(ev_rfr_perm_res_dfs)
-    ev_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_results.tsv", sep="\t", index=False)
-    ev_rfr_mean_ref_scores = np.array(ev_rfr_ref_scores).mean(axis=1)
-    ev_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_rfr_mean_ref_scores)), "ref_score": ev_rfr_mean_ref_scores})
-    ev_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_ref_scores.tsv", sep="\t", index=False)
+        # RFR (EV)
+        ev_rfr_mean_perm_res, ev_rfr_ref_scores, ev_rfr_perm_res_dfs = collect_feature_perm_results(
+            ev_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
+        )
+        ev_rfr_merge_df = merge_perm_results(ev_rfr_perm_res_dfs)
+        ev_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_results.tsv", sep="\t", index=False)
+        ev_rfr_mean_ref_scores = np.array(ev_rfr_ref_scores).mean(axis=1)
+        ev_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_rfr_mean_ref_scores)), "ref_score": ev_rfr_mean_ref_scores})
+        ev_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_ref_scores.tsv", sep="\t", index=False)
 
-    # RFR (MAE)
-    mae_rfr_mean_perm_res, mae_rfr_ref_scores, mae_rfr_perm_res_dfs = collect_feature_perm_results(
-        mae_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
-    )
-    mae_rfr_merge_df = merge_perm_results(mae_rfr_perm_res_dfs)
-    mae_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_results.tsv", sep="\t", index=False)
-    mae_rfr_mean_ref_scores = np.array(mae_rfr_ref_scores).mean(axis=1)
-    mae_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_rfr_mean_ref_scores)), "ref_score": mae_rfr_mean_ref_scores})
-    mae_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_ref_scores.tsv", sep="\t", index=False)
+        # RFR (MAE)
+        mae_rfr_mean_perm_res, mae_rfr_ref_scores, mae_rfr_perm_res_dfs = collect_feature_perm_results(
+            mae_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
+        )
+        mae_rfr_merge_df = merge_perm_results(mae_rfr_perm_res_dfs)
+        mae_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_results.tsv", sep="\t", index=False)
+        mae_rfr_mean_ref_scores = np.array(mae_rfr_ref_scores).mean(axis=1)
+        mae_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_rfr_mean_ref_scores)), "ref_score": mae_rfr_mean_ref_scores})
+        mae_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_ref_scores.tsv", sep="\t", index=False)
 
-    print(f"Completed dataset: {unified_dsets[dset_idx]}")
+        print(f"Completed dataset: {unified_dsets[dset_idx]}")
+
+
+if __name__ == "__main__":
+    main()
