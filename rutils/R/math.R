@@ -1,3 +1,6 @@
+library(tidyverse)
+library(Biobase)
+
 
 dist_L1 <- function(x, y) {
     return(sum(abs(x - y)))
@@ -17,7 +20,6 @@ find_n_closest <- function(counts, centroid, n, sample_colname) {
             top_n(-n, wt = value)
     )
 }
-
 
 get_group_centroids <- function(counts, coldata, groups, group_col, sample_col) {
     centroids <- list()

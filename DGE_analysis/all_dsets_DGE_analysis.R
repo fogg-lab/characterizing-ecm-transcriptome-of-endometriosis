@@ -66,7 +66,7 @@ for (dset_idx in 1:3) {
     nrow(sufficiently_expr_genes_df) / nrow(counts_df)
 
     filtered_counts_df <- counts_df %>%
-    dplyr::filter(geneID %in% sufficiently_expr_genes_df$geneID)
+        dplyr::filter(geneID %in% sufficiently_expr_genes_df$geneID)
 
     # Run DGE analysis
     dds <- DESeqDataSetFromMatrix(

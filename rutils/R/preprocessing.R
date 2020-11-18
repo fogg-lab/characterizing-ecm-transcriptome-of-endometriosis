@@ -1,6 +1,7 @@
 library(tidyverse)
 library(HDF5Array)
 
+
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
     colnames(matrisome_df) <- purrr::map(sub(" ", "_", colnames(matrisome_df)), tolower)
@@ -147,4 +148,11 @@ get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_name
             tot_over_thresh_prop = tot_over_thresh / (ncol(counts_df) - 1)    # subtract 1 because we assume gene names is a column
         )
     return(final_df)
+}
+
+transpose_df <- function(df, future_colnames_col, previous_colnames_col) {
+    temp_df <- as.data.frame(df)
+    rownames(temp_df) <- df[[future_colnames_col]]
+    temp_df <- temp_df %>% dplyr::select(-(!!future_colnames_col))
+    t(temp_df) %>% as_tibble(rownames = previous_colnames_col)
 }
