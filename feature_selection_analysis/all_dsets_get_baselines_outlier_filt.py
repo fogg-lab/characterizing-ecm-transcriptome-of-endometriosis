@@ -48,9 +48,10 @@ def main():
             pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
                 .set_index("sample_name")
         )
+        filtered_joined_df = prep.filter_outliers_IQR(joined_df, "survival_time", coef=1.5)
 
         rand.seed(seed)
-        x_df, y_df = prep.shuffle_data(joined_df, rand)
+        x_df, y_df = prep.shuffle_data(filtered_joined_df, rand)
 
         # Get baselines
         mean_baseline = mean_squared_error(y_df.values, np.repeat(np.mean(y_df.values.squeeze()), y_df.shape[0]))
@@ -72,7 +73,7 @@ def main():
     baseline_reg_t_df = prep.transpose_df(
         baseline_reg_df, "baseline", "dataset"
     )
-    baseline_reg_t_df.to_csv(f"{dirs.analysis_dir}/meta/reg_baselines.tsv", sep="\t", index=False)
+    baseline_reg_t_df.to_csv(f"{dirs.analysis_dir}/meta/reg_baselines_outliers_removed.tsv", sep="\t", index=False)
 
     # Classification baselines
     event_code = {"Alive": 0, "Dead": 1}
@@ -80,7 +81,7 @@ def main():
     dep_cols = ["figo_stage"]
     cat_cols = ["race", "ethnicity"]
 
-    baseline_cls_df = pd.DataFrame({"baseline": ["f1_macro_majority", "f1_macro_MC", "n"]})
+    baseline_cls_df = pd.DataFrame({"baseline": ["f1_weighted_majority", "f1_weighted_MC", "n"]})
     for dset_idx in range(3):
         # Load and filter survival data
         survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
@@ -116,20 +117,20 @@ def main():
 
         # Get baselines
         most_frequent_label = label_value_counts_df.label[0]
-        most_frequent_baseline = f1_score(y_df.values.squeeze(), np.repeat(most_frequent_label, y_df.shape[0]), average="macro")
+        most_frequent_baseline = f1_score(y_df.values.squeeze(), np.repeat(most_frequent_label, y_df.shape[0]), average="weighted")
 
         mc_baseline = opt.mc_classification_baseline(
             y=y_df.values.squeeze(),
             labels=label_value_counts_df.label.values,
             weights=label_value_counts_df.n.values / label_value_counts_df.n.values.sum(),
-            metric=lambda y, yhat: f1_score(y, yhat, average="macro"),
+            metric=lambda y, yhat: f1_score(y, yhat, average="weighted"),
             n=1001
         )
         n = y_df.shape[0]
 
         print(f"******* Classification baselines for: {unified_dsets[dset_idx]} *******")
-        print(f"F1 (macro) majority guess baseline: {most_frequent_baseline}")
-        print(f"F1 (macro) Monte Carlo baseline: {mc_baseline.mean()}")
+        print(f"F1 (weighted) majority guess baseline: {most_frequent_baseline}")
+        print(f"F1 (weighted) Monte Carlo baseline: {mc_baseline.mean()}")
         print(f"Sample size: {n}")
         print()
 

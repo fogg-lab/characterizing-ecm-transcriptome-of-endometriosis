@@ -1,0 +1,6 @@
+learning_rate	n_estimators	max_depth	max_features	min_samples_split	min_samples_leaf	loss_achieved
+0.1	108	2	auto	6	2	121393.74230127645
+0.1	100	2	auto	6	2	118950.3652440649
+0.1	100	2	auto	6	2	121762.30851615508
+0.1	100	2	auto	6	2	119414.12535672035
+0.1	100	5	auto	6	2	114141.42532052984

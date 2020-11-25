@@ -66,3 +66,24 @@ def shuffle_data(df: pd.DataFrame, rand: RandomState) -> Tuple[pd.DataFrame, pd.
     x_df = shuffled_df.iloc[:, 1:]
     y_df = shuffled_df.iloc[:, [0]]
     return x_df, y_df
+
+
+def filter_outliers_IQR(df: pd.DataFrame, filter_col: str, coef: float = 1.5):
+    q_1 = df[filter_col].quantile(0.25)
+    q_3 = df[filter_col].quantile(0.75)
+    iqr = q_3 - q_1
+    outlier_thresh = (q_1 - coef * iqr, q_3 + coef * iqr)
+    filtered_df = df.copy()
+    
+    def detect_outlier(val, thresh):
+        return (val < thresh[0]) | (thresh[1] < val)
+    
+    filtered_df["outlier_status"] = (
+        filtered_df[filter_col].apply(lambda x: detect_outlier(x, outlier_thresh))
+    )
+    filtered_df = (
+        filtered_df.query("outlier_status != True")
+            .drop("outlier_status", axis=1)
+    )
+    return filtered_df
+

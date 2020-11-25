@@ -150,9 +150,27 @@ get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_name
     return(final_df)
 }
 
+
 transpose_df <- function(df, future_colnames_col, previous_colnames_col) {
     temp_df <- as.data.frame(df)
     rownames(temp_df) <- df[[future_colnames_col]]
     temp_df <- temp_df %>% dplyr::select(-(!!future_colnames_col))
     t(temp_df) %>% as_tibble(rownames = previous_colnames_col)
+}
+
+
+filter_outliers_IQR <- function(df, filter_col, coef) {
+    quantiles <- quantile(df[[filter_col]])
+    q_1 <- quantiles[2]
+    q_3 <- quantiles[4]
+    iqr <- q_3 - q_1
+    min_thresh <- q_1 - coef * iqr
+    max_thresh <- q_3 + coef * iqr
+
+    filtered_df <- df %>%
+        dplyr::mutate(outlier_status = (!!as.name(filter_col) < min_thresh) | (max_thresh < !!as.name(filter_col))) %>%
+        dplyr::filter(outlier_status == FALSE) %>%
+        dplyr::select(-outlier_status)
+
+    return(filtered_df)
 }
