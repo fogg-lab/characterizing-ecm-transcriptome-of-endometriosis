@@ -4,7 +4,7 @@ library(survival)
 # Custom package
 library(rutils)
 
-# Define constants and load data
+# Define constants
 dirs <- rutils::get_dev_directories(dev_paths_file = "../dev_paths.txt")
 projects <- c("TCGA-CESC", "TCGA-UCS", "TCGA-UCEC", "TCGA-OV")
 unified_dsets <- c("unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data")

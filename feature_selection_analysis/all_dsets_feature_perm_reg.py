@@ -41,12 +41,12 @@ def merge_perm_results(perm_res_dfs):
     merge_df = perm_res_dfs[0]
     for i in range(1, len(perm_res_dfs)):
         merge_df = merge_df.merge(perm_res_dfs[i], on = "geneID", how = "inner")
-    merge_df = (
-        merge_df.assign(consensus_imp_mean = merge_df.filter(regex="mean_imp").mean(axis=1))
-            .assign(consensus_imp_std = merge_df.filter(regex="mean_imp").std(axis=1))
-    )
-    merge_df = merge_df.assign(consensus_imp_cv = merge_df.consensus_imp_std / merge_df.consensus_imp_mean)
-    merge_df["consensus_vote"] = (merge_df.set_index("geneID").filter(regex="mean_imp", axis=1) > 0).all(axis=1).values
+    # merge_df = (
+    #     merge_df.assign(consensus_imp_mean = merge_df.filter(regex="mean_imp").mean(axis=1))
+    #         .assign(consensus_imp_std = merge_df.filter(regex="mean_imp").std(axis=1))
+    # )
+    # merge_df = merge_df.assign(consensus_imp_cv = merge_df.consensus_imp_std / merge_df.consensus_imp_mean)
+    # merge_df["consensus_vote"] = (merge_df.set_index("geneID").filter(regex="mean_imp", axis=1) > 0).all(axis=1).values
     return merge_df
 
 

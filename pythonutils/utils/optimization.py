@@ -11,7 +11,8 @@ from typing import Optional, Tuple, List
 scoring_metrics = {
     "neg_mean_absolute_error": lambda y_true, y_pred: -mean_absolute_error(y_true, y_pred),
     "explained_variance": explained_variance_score,
-    "f1_weighted": lambda y_true, y_pred: f1_score(y_true, y_pred, average="weighted")
+    "f1_weighted": lambda y_true, y_pred: f1_score(y_true, y_pred, average="weighted"),
+    "f1_macro": lambda y_true, y_pred: f1_score(y_true, y_pred, average="macro")
 }
 
 

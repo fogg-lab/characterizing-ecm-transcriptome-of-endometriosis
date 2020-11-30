@@ -1,6 +1,11 @@
 library(tidyverse)
 library(HDF5Array)
 
+figo_map_df <- tibble(
+    roman_num = c("I", "II", "III", "IV"),
+    figo_chr = c('figo_stage_1', 'figo_stage_2', 'figo_stage_3', 'figo_stage_4'),
+    figo_num = c(1, 2, 3, 4)
+)
 
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
@@ -99,6 +104,27 @@ to_one_hot <- function(df, col) {
     # model.matrix() will prepend original column name to each one-hot column
     colnames(one_hot) <- gsub(col, paste0(col, "_"), colnames(one_hot))
     return(tibble::as_tibble(one_hot))
+}
+
+
+decode_figo_stage <- function(df, to = "num") {
+    if (str_sub(to, 1, 1) == "n") {
+        drop_col <- "figo_chr"
+        keep_col <- "figo_num"
+    }
+    else if (str_sub(to, 1, 1) == "c") {
+        drop_col <- "figo_num"
+        keep_col <- "figo_chr"
+    }
+
+    new_df <- df %>%
+        dplyr::mutate(
+            figo_rn = str_extract(figo_stage, "IV|III|II|I")
+        ) %>%
+        dplyr::inner_join(figo_map_df, by = c("figo_rn" = "roman_num")) %>%
+        dplyr::select(-c("figo_rn", "figo_stage", drop_col)) %>%
+        dplyr::rename("figo_stage" = keep_col)
+    return(new_df)
 }
 
 
