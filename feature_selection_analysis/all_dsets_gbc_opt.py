@@ -67,6 +67,8 @@ space = [
 n_initial = 10 * len(space)
 n_calls = 50 * len(space)
 
+scoring_method = "f1_macro"
+
 
 def main():
     # Train models
@@ -93,6 +95,10 @@ def main():
                 .set_index("sample_name")
         )
 
+        # Ignore covariates
+        matrisome_genes = list(norm_filtered_matrisome_counts_t_df.columns[1:])
+        joined_df = joined_df[["figo_num"] + matrisome_genes]
+
         rand.seed(seed)
         x_df, y_df = prep.shuffle_data(joined_df, rand)
 
@@ -103,11 +109,10 @@ def main():
         # )
 
         run_optimization(
-            x_df, y_df, space, "deviance", "f1_macro", rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_gbc_h_params_f1_macro.tsv"
+            x_df, y_df, space, "deviance", scoring_method, rand, n_initial, n_calls,
+            f"{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv"
         )
 
-        
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
 
 
