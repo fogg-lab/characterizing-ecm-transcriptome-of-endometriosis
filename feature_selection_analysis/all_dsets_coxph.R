@@ -25,31 +25,42 @@ for (dset_idx in 1:3) {
     # Load and filter survival data
     survival_path <- paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/survival_data.tsv")
     survival_df <- load_survival_df(survival_path, event_code)
+
     filtered_survival_df <- survival_df %>%
+        decode_figo_stage(to = "c") %>%
         dplyr::select(one_of(c("sample_name", dep_cols, covariate_cols))) %>%
-        dplyr::filter(rowSums(is.na(.)) == 0) %>%
-        dplyr::mutate(
-            figo_rn = str_extract(figo_stage, "IV|III|II|I")
-        ) %>%
-        dplyr::inner_join(figo_map_df, by = c("figo_rn" = "roman_num")) %>%
-        dplyr::select(-c(figo_rn, figo_stage)) %>%
-        dplyr::rename(figo_stage = figo_code)
+        dplyr::filter(rowSums(is.na(.)) == 0)
+
+
+    # filtered_survival_df <- survival_df %>%
+    #     dplyr::select(one_of(c("sample_name", dep_cols, covariate_cols))) %>%
+    #     dplyr::filter(rowSums(is.na(.)) == 0) %>%
+    #     dplyr::mutate(
+    #         figo_rn = str_extract(figo_stage, "IV|III|II|I")
+    #     ) %>%
+    #     dplyr::inner_join(figo_map_df, by = c("figo_rn" = "roman_num")) %>%
+    #     dplyr::select(-c(figo_rn, figo_stage)) %>%
+    #     dplyr::rename(figo_stage = figo_code)
 
     # Load normalized matrisome count data
-    norm_matrisome_counts <- read_tsv(paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/norm_matrisome_counts.tsv")) %>%
-        column_to_rownames(var = "geneID") %>%
-        as.matrix()
+    norm_matrisome_counts_df <- read_tsv(paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/norm_matrisome_counts.tsv"))
+    norm_matrisome_counts_t_df <- norm_matrisome_counts_df %>%
+        dplyr::select(c("geneID", filtered_survival_df$sample_name)) %>%
+        transpose_df("geneID", "sample_name")
+        # column_to_rownames(var = "geneID") %>%
+        # as.matrix()
 
-    # Match up columns of counts with rows of survival data & only include samples present in survival data
-    norm_matrisome_survival_counts <- norm_matrisome_counts[, filtered_survival_df$sample_name]
-    all(rownames(t(norm_matrisome_survival_counts)) == filtered_survival_df$sample_name)
+    # # Match up columns of counts with rows of survival data & only include samples present in survival data
+    # norm_matrisome_survival_counts <- norm_matrisome_counts[, filtered_survival_df$sample_name]
+    # all(rownames(t(norm_matrisome_survival_counts)) == filtered_survival_df$sample_name)
 
     # Combine survival data and normalized count data
     joined_survival_counts_df <- filtered_survival_df %>%
-    inner_join(
-        as_tibble(t(norm_matrisome_survival_counts), rownames = "sample_name"),
-        by = "sample_name"
-    )
+    # inner_join(
+    #     as_tibble(t(norm_matrisome_survival_counts), rownames = "sample_name"),
+    #     by = "sample_name"
+    # )
+    inner_join(norm_matrisome_counts_t_df, by = "sample_name")
 
     # Some genes contain the '-' symbol, which affects formulae
     colnames(joined_survival_counts_df) <- gsub("-", "_", colnames(joined_survival_counts_df))
@@ -97,7 +108,7 @@ for (dset_idx in 1:3) {
     # Num. predictive genes
     nrow(sig_cox_regression_df)
     # Prop. matrisome genes which are predictive
-    nrow(sig_cox_regression_df) / nrow(norm_matrisome_survival_counts)
+    nrow(sig_cox_regression_df) / ncol(norm_matrisome_counts_t_df)
     # Genes associated with negative prognosis
     nrow(sig_cox_regression_df %>%
         dplyr::filter(gene_coeff > 0))
