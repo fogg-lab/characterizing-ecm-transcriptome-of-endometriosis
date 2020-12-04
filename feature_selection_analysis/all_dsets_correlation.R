@@ -40,7 +40,9 @@ for (dset_idx in 1:3) {
         colnames(norm_survival_counts_t_df)[-c(1:2)],
         "survival_time",
         v = "geneID"
-    )
+    ) %>%
+    dplyr::mutate(padj = p.adjust(pval, method = "BH")) %>%
+    dplyr::select(geneID, cor, pval, padj, n)
 
     # Save results
     write_tsv(cor_test_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))
