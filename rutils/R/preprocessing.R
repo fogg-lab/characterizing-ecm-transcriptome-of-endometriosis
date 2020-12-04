@@ -1,6 +1,11 @@
 library(tidyverse)
 library(HDF5Array)
 
+figo_map_df <- tibble(
+    roman_num = c("I", "II", "III", "IV"),
+    figo_chr = c('figo_stage_1', 'figo_stage_2', 'figo_stage_3', 'figo_stage_4'),
+    figo_num = c(1, 2, 3, 4)
+)
 
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
@@ -102,6 +107,27 @@ to_one_hot <- function(df, col) {
 }
 
 
+decode_figo_stage <- function(df, to = "num") {
+    if (str_sub(to, 1, 1) == "n") {
+        drop_col <- "figo_chr"
+        keep_col <- "figo_num"
+    }
+    else if (str_sub(to, 1, 1) == "c") {
+        drop_col <- "figo_num"
+        keep_col <- "figo_chr"
+    }
+
+    new_df <- df %>%
+        dplyr::mutate(
+            figo_rn = str_extract(figo_stage, "IV|III|II|I")
+        ) %>%
+        dplyr::inner_join(figo_map_df, by = c("figo_rn" = "roman_num")) %>%
+        dplyr::select(-c("figo_rn", "figo_stage", drop_col)) %>%
+        dplyr::rename("figo_stage" = keep_col)
+    return(new_df)
+}
+
+
 get_unified_group_samples <- function(counts_df, coldata_df, sample_group) {
     if (sample_group == "GTEX") {
         group_samples <- (coldata_df %>%
@@ -150,9 +176,27 @@ get_unified_thresh_results_for_all <- function(counts_df, coldata_df, group_name
     return(final_df)
 }
 
+
 transpose_df <- function(df, future_colnames_col, previous_colnames_col) {
     temp_df <- as.data.frame(df)
     rownames(temp_df) <- df[[future_colnames_col]]
     temp_df <- temp_df %>% dplyr::select(-(!!future_colnames_col))
     t(temp_df) %>% as_tibble(rownames = previous_colnames_col)
+}
+
+
+filter_outliers_IQR <- function(df, filter_col, coef) {
+    quantiles <- quantile(df[[filter_col]])
+    q_1 <- quantiles[2]
+    q_3 <- quantiles[4]
+    iqr <- q_3 - q_1
+    min_thresh <- q_1 - coef * iqr
+    max_thresh <- q_3 + coef * iqr
+
+    filtered_df <- df %>%
+        dplyr::mutate(outlier_status = (!!as.name(filter_col) < min_thresh) | (max_thresh < !!as.name(filter_col))) %>%
+        dplyr::filter(outlier_status == FALSE) %>%
+        dplyr::select(-outlier_status)
+
+    return(filtered_df)
 }

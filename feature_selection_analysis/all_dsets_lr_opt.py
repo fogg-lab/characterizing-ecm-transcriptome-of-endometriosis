@@ -39,8 +39,11 @@ def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, 
         os.remove(callback_file)
     except OSError:
         pass
+    # c_transformer = ColumnTransformer([
+    #     ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+    # ], remainder="passthrough")
     c_transformer = ColumnTransformer([
-        ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+        ("standard", StandardScaler(), matrisome_genes)
     ], remainder="passthrough")
 
     res = gp_minimize(
@@ -85,6 +88,8 @@ no_penalty_space = [
 n_initial = 10 * len(l1_space)
 n_calls = 50 * len(l1_space)
 
+scoring_method = "f1_macro"
+
 
 def main():
     # Train models
@@ -111,26 +116,17 @@ def main():
                 .set_index("sample_name")
         )
 
+        # Ignore covariates
+        matrisome_genes = list(norm_filtered_matrisome_counts_t_df.columns[1:])
+        joined_df = joined_df[["figo_num"] + matrisome_genes]
+
         rand.seed(seed)
         x_df, y_df = prep.shuffle_data(joined_df, rand)
 
-        # Prep for running models
-        matrisome_genes = norm_filtered_matrisome_counts_t_df.columns[1:]
-
         # Optimize models
         run_optimization(
-            x_df, y_df, l2_space, "l2", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_lr_h_params_l2_f1_weighted.tsv"
-        )
-
-        run_optimization(
-            x_df, y_df, l1_space, "l1", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_lr_h_params_l1_f1_weighted.tsv"
-        )
-
-        run_optimization(
-            x_df, y_df, no_penalty_space, "none", "f1_weighted", rand, matrisome_genes, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_lr_h_params_none_f1_weighted.tsv"
+            x_df, y_df, l1_space, "l1", scoring_method, rand, matrisome_genes, n_initial, n_calls,
+            f"{unified_dsets[dset_idx]}_opt_lr_h_params_l1_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

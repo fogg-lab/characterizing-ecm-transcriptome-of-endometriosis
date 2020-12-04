@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 import os
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.model_selection import cross_val_score, KFold
-from sklearn.metrics import f1_score
+from sklearn.metrics import mean_absolute_error
 from skopt.space import Real, Integer, Categorical
 from skopt import gp_minimize
 
@@ -13,30 +13,32 @@ import utils.optimization as opt
 
 
 # Helper functions
-def objective(h_params, X, y, scoring_default, r, verbose=True):
+def objective(h_params, X, y, loss_default, scoring_default, r, verbose=True):
     if verbose:
         print(h_params)
-    model = RandomForestClassifier(
-        n_estimators=h_params[0],
-        max_depth=h_params[1],
-        max_features=h_params[2],
-        min_samples_split=h_params[3],
-        min_samples_leaf=h_params[4],
-        bootstrap=h_params[5],
-        n_jobs=-1,
+    model = GradientBoostingRegressor(
+        # We use lad since it most closely matches up with hyper-parameter objective
+        loss=loss_default,
+        # Use this for the same reason
+        learning_rate=h_params[0],
+        n_estimators=h_params[1],
+        max_depth=h_params[2],
+        max_features=h_params[3],
+        min_samples_split=h_params[4],
+        min_samples_leaf=h_params[5],
         random_state=r
     )
     return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
 
 
-def run_optimization(x_df, y_df, space, scoring_default, rand, n_initial, n_calls, callback_file):
+def run_optimization(x_df, y_df, space, loss_default, scoring_default, rand, n_initial, n_calls, callback_file):
     try:
         os.remove(callback_file)
     except OSError:
         pass
 
     res = gp_minimize(
-        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), scoring_default, rand),
+        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), loss_default, scoring_default, rand),
         space,
         verbose=True,
         random_state=rand,
@@ -47,27 +49,25 @@ def run_optimization(x_df, y_df, space, scoring_default, rand, n_initial, n_call
     )
 
 
-# Define constants and load data
+# Define constants
 dirs = dev_conf.get_dev_directories("../dev_paths.txt")
 unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uterine_endometrial_data"]
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
-covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
-dep_cols = ["figo_stage"]
-cat_cols = ["race", "ethnicity"]
+covariate_cols = ["figo_stage", "age_at_diagnosis", "race", "ethnicity"]
+dep_cols = ["vital_status", "survival_time"]
+cat_cols = ["race", "ethnicity", "figo_chr"]
 space = [
+    Real(1e-3, 1e-1, name="learning_rate"),
     Integer(int(1e2), int(1e3), name="n_estimators"),
-    Integer(int(10), int(100), name="max_depth"),
+    Integer(2, 5, name="max_depth"),
     Categorical(["auto", "sqrt", "log2"], name="max_features"),
-    Integer(int(2), int(4), name="min_samples_split"),
-    Integer(int(1), int(3), name="min_samples_leaf"),
-    Categorical([True, False], name="bootstrap")
+    Integer(int(2), int(6), name="min_samples_split"),
+    Integer(int(1), int(3), name="min_samples_leaf")
 ]
-n_initial = 10 * len(space)
-n_calls = 50 * len(space)
-
-scoring_method = "f1_macro"
+n_initial = 10 * (len(space))
+n_calls = 50 * (len(space))
 
 
 def main():
@@ -76,10 +76,11 @@ def main():
         # Load and filter survival data
         survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
         filtered_survival_df = (
-            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="c")
+                .query("vital_status == 1")
+                .drop(["vital_status"], axis=1)
                 .pipe(pd.get_dummies, columns=cat_cols)
                 .reset_index(drop = True)
-                .pipe(prep.cols_to_front, ["sample_name", "figo_num"])
         )
         filtered_survival_df.columns = filtered_survival_df.columns.str.replace(' ', '_')
 
@@ -94,18 +95,15 @@ def main():
             pd.merge(filtered_survival_df, norm_filtered_matrisome_counts_t_df, on="sample_name")
                 .set_index("sample_name")
         )
-
-        # Ignore covariates
-        matrisome_genes = list(norm_filtered_matrisome_counts_t_df.columns[1:])
-        joined_df = joined_df[["figo_num"] + matrisome_genes]
+        filtered_joined_df = prep.filter_outliers_IQR(joined_df, "survival_time", coef=1.5)
 
         rand.seed(seed)
-        x_df, y_df = prep.shuffle_data(joined_df, rand)
+        x_df, y_df = prep.shuffle_data(filtered_joined_df, rand)
 
         # Optimize models
         run_optimization(
-            x_df, y_df, space, scoring_method, rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_rfc_h_params_{scoring_method}.tsv"
+            x_df, y_df, space, "ls", "neg_mean_squared_error", rand, n_initial, n_calls,
+            f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_squared_error_removed.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

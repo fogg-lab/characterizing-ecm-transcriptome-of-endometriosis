@@ -1,0 +1,6 @@
+learning_rate	n_estimators	max_depth	max_features	min_samples_split	min_samples_leaf	loss_achieved
+0.1	1000	2	sqrt	2	3	146078.12023846345
+0.1	1000	2	sqrt	2	3	135080.6019337008
+0.1	259	2	sqrt	5	3	140310.94106722838
+0.1	421	2	sqrt	6	3	144450.8413365966
+0.1	1000	2	sqrt	6	3	143862.82629058734
