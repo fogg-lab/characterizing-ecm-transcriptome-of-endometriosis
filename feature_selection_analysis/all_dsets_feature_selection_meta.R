@@ -39,6 +39,9 @@ cor_meta_df <- tibble(
 mi_survival_meta_df <- tibble(
     "item" = c("n_mi")
 )
+anova_meta_df <- tibble(
+    "item" = c("n_sig")
+)
 mi_figo_meta_df <- tibble(
     "item" = c("n_mi")
 )
@@ -97,7 +100,7 @@ for (dset_idx in 1:3) {
     #region Regression
     ## Correlation
     cor_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))
-    filtered_cor_results_df <- cor_results_df %>% dplyr::filter(pval < p_thresh)
+    filtered_cor_results_df <- cor_results_df %>% dplyr::filter(padj < p_thresh)
 
     n_cor <- nrow(filtered_cor_results_df)
     n_cor_down <- nrow(filtered_cor_results_df %>% dplyr::filter(cor < 0))
@@ -124,6 +127,16 @@ for (dset_idx in 1:3) {
     #endregion
 
     #region Classification
+    ## ANOVA (FIGO)
+    anova_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
+    filtered_anova_results_df <- anova_results_df %>% dplyr::filter(padj < p_thresh)
+
+    n_anov_sig <- nrow(filtered_anova_results_df)
+
+    dset <- unified_dsets[dset_idx]
+    anova_meta_df <- anova_meta_df %>%
+        add_column(!!dset := c(n_anov_sig))
+
     ## MI (FIGO)
     mi_figo_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_MI_figo_results.tsv"))
     filtered_mi_figo_results_df <- mi_figo_results_df %>% dplyr::filter(MI_est_median > 0)
@@ -174,6 +187,7 @@ write_tsv(deg_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$a
 write_tsv(coxph_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_coxph_meta.tsv"))
 write_tsv(cor_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_cor_meta.tsv"))
 write_tsv(mi_survival_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mi_survival_meta.tsv"))
+write_tsv(anova_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_anova_meta.tsv"))
 write_tsv(mi_figo_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mi_figo_meta.tsv"))
 write_tsv(f1_gbc_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_f1_gbc_meta.tsv"))
 write_tsv(f1_l1_lr_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_f1_l1_lr_meta.tsv"))
