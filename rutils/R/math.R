@@ -57,3 +57,16 @@ critical_r <- function(n, alpha = .05) {
   critical_r <- sqrt((critical_t ^ 2) / ((critical_t ^ 2) + df))
   return(critical_r)
 }
+
+
+colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH") {
+    pvals <- rep(0, length(cols))
+    for (i in seq_len(length(cols))) {
+        formula_str <- paste0(cols[i], " ~ ", dep_var)
+        aov_res <- oneway.test(as.formula(formula_str), data = df)
+        pvals[i] <- aov_res$p.value
+    }
+    aov_df <- tibble(!!as.name(colnames_col) := cols, "pval" = pvals) %>%
+        dplyr::mutate(padj = p.adjust(pval, method = adjust_method))
+    return(aov_df)
+}

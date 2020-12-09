@@ -1,6 +1,0 @@
-learning_rate	n_estimators	max_depth	max_features	min_samples_split	min_samples_leaf	loss_achieved
-0.08432532969435894	422	2	log2	4	2	-1.0
-0.09954048972136777	420	4	log2	5	1	-1.0
-0.04048875297988951	317	3	log2	5	1	-1.0
-0.0568715452495534	826	3	log2	3	2	-1.0
-0.08672058137202322	985	2	log2	3	2	-1.0
