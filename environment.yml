@@ -42,9 +42,12 @@ dependencies:
   - bioconductor-genomicalignments=1.22.0=r36h516909a_0
   - bioconductor-genomicfeatures=1.38.0=r36_0
   - bioconductor-genomicranges=1.38.0=r36h516909a_0
+  - bioconductor-go.db=3.10.0=r36_0
   - bioconductor-hdf5array=1.14.0=r36h516909a_0
+  - bioconductor-impute=1.60.0=r36h6e990d7_0
   - bioconductor-iranges=2.20.0=r36h516909a_0
   - bioconductor-limma=3.42.0=r36h516909a_0
+  - bioconductor-preprocesscore=1.48.0=r36h516909a_0
   - bioconductor-protgenerics=1.18.0=r36_0
   - bioconductor-rhdf5=2.30.0=r36he1b5a44_0
   - bioconductor-rhdf5lib=1.8.0=r36h516909a_0
@@ -64,9 +67,9 @@ dependencies:
   - bwidget=1.9.14=0
   - bzip2=1.0.8=h516909a_2
   - c-ares=1.16.1=h516909a_0
-  - ca-certificates=2020.11.8=ha878542_0
+  - ca-certificates=2020.12.5=ha878542_0
   - cairo=1.16.0=hcf35c78_1003
-  - certifi=2020.11.8=py38h578d9bd_0
+  - certifi=2020.12.5=py38h578d9bd_0
   - cffi=1.14.1=py38h5bae8af_0
   - chardet=3.0.4=py38h32f6830_1006
   - click=7.1.2=pyh9f0ad1d_0
@@ -240,12 +243,14 @@ dependencies:
   - r-data.table=1.12.8=r36hcdcec82_1
   - r-dbi=1.1.0=r36h6115d3f_1
   - r-dbplyr=1.4.4=r36h6115d3f_0
+  - r-deoptimr=1.0_8=r36h6115d3f_1003
   - r-desc=1.2.0=r36h6115d3f_1003
   - r-devtools=2.0.2=r36h6115d3f_0
   - r-digest=0.6.25=r36h0357c0b_2
   - r-doparallel=1.0.15=r36h6115d3f_1
   - r-downloader=0.4=r36h6115d3f_1003
   - r-dplyr=1.0.0=r36h0357c0b_0
+  - r-dynamictreecut=1.63_1=r36h6115d3f_1003
   - r-ellipse=0.4.2=r36h6115d3f_0
   - r-ellipsis=0.3.1=r36hcdcec82_0
   - r-essentials=3.6.0=r36_0
@@ -253,7 +258,9 @@ dependencies:
   - r-exactranktests=0.8_31=r36hcdcec82_1
   - r-fansi=0.4.1=r36hcdcec82_1
   - r-farver=2.0.3=r36h0357c0b_1
+  - r-fastcluster=1.1.25=r36hc99cbb1_1003
   - r-fastmap=1.0.1=r36h0357c0b_1
+  - r-fit.models=0.64=r36h6115d3f_0
   - r-forcats=0.5.0=r36h6115d3f_1
   - r-foreach=1.5.0=r36h6115d3f_1
   - r-foreign=0.8_76=r36hcdcec82_1
@@ -346,6 +353,7 @@ dependencies:
   - r-openxlsx=4.1.5=r36h0357c0b_0
   - r-pbdzmq=0.3_3=r36h559a7a4_1003
   - r-pbkrtest=0.4_8.6=r36h6115d3f_0
+  - r-pcapp=1.9_73=r36h51c796c_1003
   - r-pheatmap=1.0.12=r36h6115d3f_2
   - r-pillar=1.4.6=r36h6115d3f_0
   - r-pkgbuild=1.1.0=r36h6115d3f_0
@@ -399,9 +407,12 @@ dependencies:
   - r-rjson=0.2.20=r36h0357c0b_1002
   - r-rlang=0.4.7=r36hcdcec82_0
   - r-rmarkdown=2.3=r36h6115d3f_0
+  - r-robust=0.5_0.0=r36hbf399a0_1
+  - r-robustbase=0.93_6=r36hbf399a0_1
   - r-roxygen2=6.1.1=r36h29659fb_0
   - r-rpart=4.1_15=r36hcdcec82_2
   - r-rprojroot=1.3_2=r36h6115d3f_1003
+  - r-rrcov=1.5_5=r36hfa343cc_0
   - r-rspectra=0.16_0=r36h51c796c_3
   - r-rsqlite=2.2.0=r36h0357c0b_2
   - r-rstatix=0.6.0=r36h6115d3f_0
@@ -444,6 +455,7 @@ dependencies:
   - r-viridis=0.5.1=r36h6115d3f_1004
   - r-viridislite=0.3.0=r36h6115d3f_1003
   - r-webshot=0.5.2=r36h6115d3f_1
+  - r-wgcna=1.69=r36h0357c0b_0
   - r-whisker=0.4=r36h6115d3f_1
   - r-withr=2.2.0=r36h6115d3f_1
   - r-xfun=0.16=r36hcdcec82_0
@@ -468,6 +480,7 @@ dependencies:
   - send2trash=1.5.0=py_0
   - setuptools=49.2.0=py38h32f6830_0
   - six=1.15.0=pyh9f0ad1d_0
+  - sklearn-contrib-py-earth=0.1.0=py38h0b5ebd8_3
   - sortedcontainers=2.2.2=pyh9f0ad1d_0
   - spectra=0.0.11=py_1
   - sqlite=3.32.3=hcee41ef_1
@@ -506,4 +519,5 @@ dependencies:
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h516909a_1006
   - zstd=1.4.5=h6597ccf_2
+prefix: /home/carcook/anaconda3/envs/TCGA-round1
 
