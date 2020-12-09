@@ -43,17 +43,10 @@ for (dset_idx in 1:3) {
     gene_names <- colnames(joined_df[-c(1:2)])
     waov_df <- tibble(geneID = c(), pval = c())
 
-    for (g in gene_names) {
-        formula_str <- paste0(g, " ~ figo_stage")
-        waov_res <- oneway.test(as.formula(formula_str), data = joined_df)
-        # Welch one-way ANOVA (doesn't assume equal variance for each group)
-        waov_df <- waov_df %>%
-            bind_rows(tibble(geneID = g, pval = waov_res$p.value))
-    }
-    waov_df <- waov_df %>%
-        # restore original gene names (no longer care about formula)
-        dplyr::mutate(geneID = gsub("_", "-", geneID)) %>%
-        dplyr::mutate(padj = p.adjust(pval, method = "BH"))
+    waov_df <- colwise_anova(joined_df, "figo_stage", gene_names, "geneID", adjust_method = "BH")
+
+    # Re-sub '-' symbol
+    waov_df$geneID <- gsub("_", "-", waov_df$geneID)
 
     write_tsv(waov_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
 }

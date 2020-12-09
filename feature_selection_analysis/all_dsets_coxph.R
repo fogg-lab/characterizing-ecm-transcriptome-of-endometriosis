@@ -13,10 +13,6 @@ matrisome_path <- paste0(dirs$data_dir, "/matrisome/matrisome_hs_masterlist.tsv"
 event_code <- list("Alive" = 0, "Dead" = 1)
 covariate_cols <- c("figo_stage", "age_at_diagnosis", "race", "ethnicity")
 dep_cols <- c("vital_status", "survival_time")
-figo_map_df <- tibble(
-    roman_num = c("I", "II", "III", "IV"),
-    figo_code = c('1', '2', '3', '4')
-)
 
 
 cox_null_scores_df <- tibble(score = c("lr_test_pval", "wald_test_pval", "score_test_pval"))
@@ -30,17 +26,6 @@ for (dset_idx in 1:3) {
         decode_figo_stage(to = "c") %>%
         dplyr::select(one_of(c("sample_name", dep_cols, covariate_cols))) %>%
         dplyr::filter(rowSums(is.na(.)) == 0)
-
-
-    # filtered_survival_df <- survival_df %>%
-    #     dplyr::select(one_of(c("sample_name", dep_cols, covariate_cols))) %>%
-    #     dplyr::filter(rowSums(is.na(.)) == 0) %>%
-    #     dplyr::mutate(
-    #         figo_rn = str_extract(figo_stage, "IV|III|II|I")
-    #     ) %>%
-    #     dplyr::inner_join(figo_map_df, by = c("figo_rn" = "roman_num")) %>%
-    #     dplyr::select(-c(figo_rn, figo_stage)) %>%
-    #     dplyr::rename(figo_stage = figo_code)
 
     # Load normalized matrisome count data
     norm_matrisome_counts_df <- read_tsv(paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/norm_matrisome_counts.tsv"))
@@ -56,10 +41,6 @@ for (dset_idx in 1:3) {
 
     # Combine survival data and normalized count data
     joined_survival_counts_df <- filtered_survival_df %>%
-    # inner_join(
-    #     as_tibble(t(norm_matrisome_survival_counts), rownames = "sample_name"),
-    #     by = "sample_name"
-    # )
     inner_join(norm_matrisome_counts_t_df, by = "sample_name")
 
     # Some genes contain the '-' symbol, which affects formulae
