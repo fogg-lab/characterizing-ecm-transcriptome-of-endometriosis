@@ -200,3 +200,37 @@ filter_outliers_IQR <- function(df, filter_col, coef) {
 
     return(filtered_df)
 }
+
+load_matrisome_norm_counts <- function(dset_path, event_code, keep_clinical = NULL, keep_conditions = c("healthy", "tumor"), drop_unexpressed = TRUE) {
+    # Load clinical data
+    clinical_df <- load_survival_df(paste0(dset_path, "/survival_data.tsv"), event_code) %>%
+        # {if (!is.null(keep_clinical)) dplyr::select(., one_of(keep_clinical)) else .} %>%
+        dplyr::select(one_of(keep_clinical)) %>%
+        dplyr::filter(rowSums(is.na(.)) == 0)
+    coldata_df <- read_tsv(paste0(dset_path, "/coldata.tsv")) %>%
+        dplyr::filter(condition %in% keep_conditions)
+    
+    if (drop_unexpressed) {
+        unexpressed_genes <- read_tsv(paste0(dset_path, "/matrisome_counts.tsv")) %>%
+            dplyr::select(one_of("geneID", coldata_df$sample_name)) %>%
+            dplyr::filter(rowSums(.[, -1]) == 0) %>%
+            dplyr::pull(geneID)
+    } else {
+        unexpressed_genes <- c()
+    }
+
+    if(is.null(keep_clinical)) {
+        keeper_samples <- coldata_df$sample_name
+    } else {
+        keeper_samples <- clinical_df$sample_name
+    }
+
+    matrisome_norm_counts_df <- read_tsv(paste0(dset_path, "/norm_matrisome_counts.tsv")) %>%
+        dplyr::select(one_of(c("geneID", coldata_df$sample_name))) %>%
+        dplyr::filter(!(geneID %in% unexpressed_genes)) %>%    # Drop unexpressed genes (if desired)
+        transpose_df(future_colnames_col = "geneID", previous_colnames_col = "sample_name") %>%
+        dplyr::filter(sample_name %in% keeper_samples) %>%   # Drop samples w/ missing clinical data
+        inner_join(coldata_df, by = "sample_name") %>%
+        dplyr::select(sample_name, condition, data_source, everything())
+    return(matrisome_norm_counts_df)
+}
