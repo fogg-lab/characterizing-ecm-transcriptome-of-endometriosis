@@ -201,6 +201,7 @@ filter_outliers_IQR <- function(df, filter_col, coef) {
     return(filtered_df)
 }
 
+
 load_matrisome_norm_counts <- function(dset_path, event_code, keep_clinical = NULL, keep_conditions = c("healthy", "tumor"), drop_unexpressed = TRUE) {
     # Load clinical data
     clinical_df <- load_survival_df(paste0(dset_path, "/survival_data.tsv"), event_code) %>%
