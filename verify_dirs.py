@@ -76,6 +76,22 @@ if not os.path.exists(figures_dir):
 else:
     print(f"[SUCCESS] Figures directory already exists.")
 
+# Check existence of figures/network directory
+if not os.path.exists(f"{figures_dir}/network"):
+    os.makedirs(f"{figures_dir}/network")
+    print(f"[SUCCESS] Created figures/network directory: {figures_dir}/network")
+else:
+    print(f"[SUCCESS] Figures network directory already exists.")
+
+# Check existence of figures/enrichment directory
+if not os.path.exists(f"{figures_dir}/enrichment"):
+    os.makedirs(f"{figures_dir}/enrichment")
+    print(f"[SUCCESS] Created figures/enrichment directory: {figures_dir}/enrichment")
+else:
+    print(f"[SUCCESS] Figures enrichment directory already exists.")
+
+
+
 if all_present:
     print(f"[ALL SUCCEEDED] All necessary data/directories present.")
 else:
