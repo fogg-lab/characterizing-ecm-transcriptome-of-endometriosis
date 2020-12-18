@@ -66,7 +66,9 @@ colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH")
         aov_res <- oneway.test(as.formula(formula_str), data = df)
         pvals[i] <- aov_res$p.value
     }
-    aov_df <- tibble(!!as.name(colnames_col) := cols, "pval" = pvals) %>%
+    # aov_df <- tibble(!!as.name(colnames_col) := cols, "pval" = pvals) %>%
+    aov_df <- tibble(!!as.name(colnames_col) := cols) %>%
+        dplyr::mutate(pval = pvals) %>%
         dplyr::mutate(padj = p.adjust(pval, method = adjust_method))
     return(aov_df)
 }

@@ -75,7 +75,8 @@ for (dset_idx in 1:3) {
         design = ~ condition
     )
     dge_res <- run_DESeq_and_get_results(dds)
-    dge_res_df <- as_tibble(dge_res, rownames = "geneID")
+    dge_res_df <- as_tibble(dge_res, rownames = "geneID") %>%
+        dplyr::mutate(qval = WGCNA::qvalue(pvalue)$qvalues)
 
     # Save results
     write_tsv(dge_res_df, paste0(dirs$analysis_dir, "/", dsets[dset_idx], "_DESeq_results.tsv"))

@@ -41,8 +41,11 @@ for (dset_idx in 1:3) {
         "survival_time",
         v = "geneID"
     ) %>%
-    dplyr::mutate(padj = p.adjust(pval, method = "BH")) %>%
-    dplyr::select(geneID, cor, pval, padj, n)
+        dplyr::mutate(padj = p.adjust(pval, method = "BH")) %>%
+        dplyr::select(geneID, cor, pval, padj, n) %>%
+        na.omit() %>%
+        dplyr::mutate(qval = WGCNA::qvalue(pval)$qvalues) %>%
+        dplyr::select(geneID, cor, pval, padj, qval, n)
 
     # Save results
     write_tsv(cor_test_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))

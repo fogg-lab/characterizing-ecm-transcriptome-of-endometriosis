@@ -1,5 +1,6 @@
 library(tidyverse)
 library(survival)
+library(WGCNA)
 
 # Custom package
 library(rutils)
@@ -79,24 +80,13 @@ for (dset_idx in 1:3) {
     }
 
     # Re-sub '-' for '_' now that no longer needed for formulae
-    cox_regression_df <- tibble("geneID" = gsub("_", "-", genes_of_interest), "gene_pval" = gene_pvals, "gene_coeff" = gene_coeffs)
-    sig_cox_regression_df <- cox_regression_df %>%
-        dplyr::filter(gene_pval < 0.05)
+    cox_regression_df <- tibble("geneID" = gsub("_", "-", genes_of_interest), "gene_pval" = gene_pvals, "gene_coeff" = gene_coeffs) %>%
+        dplyr::mutate(gene_qval = WGCNA::qvalue(gene_pval)$qvalues) %>%
+        dplyr::mutate(gene_padj = p.adjust(gene_pval, method = "BH"))
 
     # Save results
     write_tsv(cox_regression_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_coxph_results.tsv"))
 
-    # Num. predictive genes
-    nrow(sig_cox_regression_df)
-    # Prop. matrisome genes which are predictive
-    nrow(sig_cox_regression_df) / ncol(norm_matrisome_counts_t_df)
-    # Genes associated with negative prognosis
-    nrow(sig_cox_regression_df %>%
-        dplyr::filter(gene_coeff > 0))
-
-    # Genes associated with positive prognosis
-    nrow(sig_cox_regression_df %>%
-        dplyr::filter(gene_coeff < 0))
 }
 
 write_tsv(cox_null_scores_df %>% rutils::transpose_df("score", "dataset"), paste0(dirs$analysis_dir, "/meta/", "coxph_null_scores.tsv"))
