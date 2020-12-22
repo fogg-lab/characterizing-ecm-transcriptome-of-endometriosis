@@ -10,7 +10,7 @@ figo_map_df <- tibble(
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
     colnames(matrisome_df) <- purrr::map(sub(" ", "_", colnames(matrisome_df)), tolower)
-    matrisome_df <- select(matrisome_df, gene_symbol, everything()) %>%
+    matrisome_df <- dplyr::select(matrisome_df, gene_symbol, everything()) %>%
         dplyr::filter(division != "Retired")    # Ignore "Retired" matrisome genes
     return(matrisome_df)
 }
@@ -224,4 +224,27 @@ condense_figo <- function(df, include_pvals = TRUE) {
         dplyr::select(-matches("figo_stage_[0-9]")) %>%
         { if (!include_pvals) dplyr::select(., -vital_pval) else .}
     return(filtered_df)
+}
+
+
+make_ea_df <- function(res, ea_type) {
+    if (ea_type == "GO") {
+        df <- tibble(
+            type = res$Description,
+            geneIDs = res$geneID,
+            count = res$Count,
+            ratio = sapply(res$GeneRatio, FUN = function(x) { eval(parse(text = x)) }),
+            qval = res$qvalue,
+            ont = as.character(res$ONTOLOGY)
+        )
+    } else if (ea_type == "KEGG") {
+        df <- tibble(
+            type = res$Description,
+            geneIDs = res$geneID,
+            count = res$Count,
+            ratio = sapply(res$GeneRatio, FUN = function(x) { eval(parse(text = x)) }),
+            qval = res$qvalue
+        )
+    }
+    return(df)
 }
