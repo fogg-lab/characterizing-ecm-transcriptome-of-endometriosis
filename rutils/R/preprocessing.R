@@ -228,7 +228,8 @@ condense_figo <- function(df, include_pvals = TRUE) {
 
 
 make_ea_df <- function(res, ea_type) {
-    if (ea_type == "GO") {
+    lc_ea_type <- tolower(ea_type)
+    if (lc_ea_type == "go") {
         df <- tibble(
             type = res$Description,
             geneIDs = res$geneID,
@@ -237,7 +238,7 @@ make_ea_df <- function(res, ea_type) {
             qval = res$qvalue,
             ont = as.character(res$ONTOLOGY)
         )
-    } else if (ea_type == "KEGG") {
+    } else if (lc_ea_type == "kegg") {
         df <- tibble(
             type = res$Description,
             geneIDs = res$geneID,
