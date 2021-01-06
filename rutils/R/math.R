@@ -1,5 +1,6 @@
 library(tidyverse)
 library(Biobase)
+library(WGCNA)
 
 
 dist_L1 <- function(x, y) {
@@ -71,4 +72,22 @@ colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH")
         dplyr::mutate(pval = pvals) %>%
         dplyr::mutate(padj = p.adjust(pval, method = adjust_method))
     return(aov_df)
+}
+
+
+get_most_conn_genes <- function(data_expr, module_colors, soft_power, type = "unsigned", conn_vs_hub_thresh = 0.5) {
+    hub_ls <- list()
+    for (mc in unique(module_colors)) {
+        mini_adj <- WGCNA::adjacency(data_expr[, module_colors == mc], power = soft_power, type = type)
+        mc_hubs_df <- as_tibble(mini_adj, rownames = "geneID") %>%
+            dplyr::select(geneID, everything()) %>%
+            dplyr::mutate(conn = rowSums(as.matrix(.[-c(1)]))) %>%
+            dplyr::select(geneID, conn) %>%
+            dplyr::arrange(desc(conn)) %>%
+            # Get connectivity of each gene (as a proportion of hub gene's connectivity)
+            dplyr::mutate(conn_vs_hub = 1 - abs((conn - first(conn)) / first(conn))) %>%
+            dplyr::filter(conn_vs_hub > conn_vs_hub_thresh)
+        hub_ls[[mc]] <- mc_hubs_df
+    }
+    return(hub_ls)
 }
