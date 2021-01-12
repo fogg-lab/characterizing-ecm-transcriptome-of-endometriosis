@@ -99,7 +99,7 @@ for (dset_idx in 1:3) {
 
     #region Regression
     ## Correlation
-    cor_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))
+    cor_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_cor_results.tsv"))
     filtered_cor_results_df <- cor_results_df %>% dplyr::filter(padj < p_thresh)
 
     n_cor <- nrow(filtered_cor_results_df)
