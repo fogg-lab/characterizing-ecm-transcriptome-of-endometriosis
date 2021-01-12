@@ -48,5 +48,5 @@ for (dset_idx in 1:3) {
         dplyr::select(geneID, cor, pval, padj, qval, n)
 
     # Save results
-    write_tsv(cor_test_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_cor_results.tsv"))
+    write_tsv(cor_test_df, paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_cor_results.tsv"))
 }
