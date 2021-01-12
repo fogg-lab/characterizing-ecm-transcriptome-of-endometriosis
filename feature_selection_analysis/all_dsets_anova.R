@@ -1,4 +1,5 @@
 library(tidyverse)
+library(WGCNA)
 
 # Custom package
 library(rutils)
@@ -41,9 +42,11 @@ for (dset_idx in 1:3) {
 
     # Perform Welch ANOVA for each gene and apply BH adjustment to p-values
     gene_names <- colnames(joined_df[-c(1:2)])
-    waov_df <- tibble(geneID = c(), pval = c())
+    # waov_df <- tibble(geneID = c(), pval = c())
 
-    waov_df <- colwise_anova(joined_df, "figo_stage", gene_names, "geneID", adjust_method = "BH")
+    waov_df <- colwise_anova(joined_df, "figo_stage", gene_names, "geneID", adjust_method = "BH") %>%
+        na.omit() %>%
+        dplyr::mutate(qval = WGCNA::qvalue(pval)$qvalues)
 
     # Re-sub '-' symbol
     waov_df$geneID <- gsub("_", "-", waov_df$geneID)

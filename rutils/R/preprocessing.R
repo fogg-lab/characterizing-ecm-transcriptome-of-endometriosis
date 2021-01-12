@@ -10,7 +10,7 @@ figo_map_df <- tibble(
 load_matrisome_df <- function(matrisome_list_file) {
     matrisome_df <- readr::read_tsv(matrisome_list_file, quote = "")
     colnames(matrisome_df) <- purrr::map(sub(" ", "_", colnames(matrisome_df)), tolower)
-    matrisome_df <- select(matrisome_df, gene_symbol, everything()) %>%
+    matrisome_df <- dplyr::select(matrisome_df, gene_symbol, everything()) %>%
         dplyr::filter(division != "Retired")    # Ignore "Retired" matrisome genes
     return(matrisome_df)
 }
@@ -199,4 +199,53 @@ filter_outliers_IQR <- function(df, filter_col, coef) {
         dplyr::select(-outlier_status)
 
     return(filtered_df)
+}
+
+
+select_substring_patterns <- function(df, substrings, complement = FALSE) {
+    substring_union <- paste(substrings, collapse = "|")
+    condensed_df <- df %>%
+        { if (complement) dplyr::select_if(!grepl(substring_union, colnames(.))) else dplyr::select_if(grepl(substring_union, colnames(.))) }
+    return(condensed_df)
+}
+
+
+condense_figo <- function(df, include_pvals = TRUE) {
+    if (include_pvals) {
+        figo_pval_cols <- colnames(df)[grepl("figo_stage_[1-4]_pval", colnames(df))]
+    }
+    figo_qval_cols <- colnames(df)[grepl("figo_stage_[1-4]_qval", colnames(df))]
+    figo_cor_cols <- colnames(df)[grepl("figo_stage_[1-4]_cor", colnames(df))]
+
+    filtered_df <- df %>%
+        { if (include_pvals) dplyr::mutate(., figo_min_pval = apply(df[figo_pval_cols], MARGIN = 1, FUN = min)) else . } %>%
+        dplyr::mutate(figo_min_qval = apply(df[figo_qval_cols], MARGIN = 1, FUN = min)) %>%
+        dplyr::mutate(figo_max_cor = apply(df[figo_cor_cols], MARGIN = 1, FUN = max)) %>%
+        dplyr::select(-matches("figo_stage_[0-9]")) %>%
+        { if (!include_pvals) dplyr::select(., -vital_pval) else .}
+    return(filtered_df)
+}
+
+
+make_ea_df <- function(res, ea_type) {
+    lc_ea_type <- tolower(ea_type)
+    if (lc_ea_type == "go") {
+        df <- tibble(
+            type = res$Description,
+            geneIDs = res$geneID,
+            count = res$Count,
+            ratio = sapply(res$GeneRatio, FUN = function(x) { eval(parse(text = x)) }),
+            qval = res$qvalue,
+            ont = as.character(res$ONTOLOGY)
+        )
+    } else if (lc_ea_type == "kegg") {
+        df <- tibble(
+            type = res$Description,
+            geneIDs = res$geneID,
+            count = res$Count,
+            ratio = sapply(res$GeneRatio, FUN = function(x) { eval(parse(text = x)) }),
+            qval = res$qvalue
+        )
+    }
+    return(df)
 }

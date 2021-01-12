@@ -62,12 +62,49 @@ if not os.path.exists(f"{analysis_dir}/meta"):
 else:
     print(f"[SUCCESS] Analysis meta directory already exists.")
 
+# Check existence of analysis/network directory
+if not os.path.exists(f"{analysis_dir}/network"):
+    os.makedirs(f"{analysis_dir}/network")
+    print(f"[SUCCESS] Created analysis/network directory: {analysis_dir}/network")
+else:
+    print(f"[SUCCESS] Analysis network directory already exists.")
+
+# Check existence of analysis/enrichment directory
+if not os.path.exists(f"{analysis_dir}/enrichment"):
+    os.makedirs(f"{analysis_dir}/enrichment")
+    print(f"[SUCCESS] Created analysis/enrichment directory: {analysis_dir}/enrichment")
+else:
+    print(f"[SUCCESS] Analysis enrichment directory already exists.")
+
+# Check existence of analysis/gene_lists directory
+if not os.path.exists(f"{analysis_dir}/gene_lists"):
+    os.makedirs(f"{analysis_dir}/gene_lists")
+    print(f"[SUCCESS] Created analysis/gene_lists directory: {analysis_dir}/gene_lists")
+else:
+    print(f"[SUCCESS] Analysis gene_lists directory already exists.")
+
 # Check existence of figures directory
 if not os.path.exists(figures_dir):
     os.makedirs(figures_dir)
     print(f"[SUCCESS] Created figures directory: {figures_dir}")
 else:
     print(f"[SUCCESS] Figures directory already exists.")
+
+# Check existence of figures/network directory
+if not os.path.exists(f"{figures_dir}/network"):
+    os.makedirs(f"{figures_dir}/network")
+    print(f"[SUCCESS] Created figures/network directory: {figures_dir}/network")
+else:
+    print(f"[SUCCESS] Figures network directory already exists.")
+
+# Check existence of figures/enrichment directory
+if not os.path.exists(f"{figures_dir}/enrichment"):
+    os.makedirs(f"{figures_dir}/enrichment")
+    print(f"[SUCCESS] Created figures/enrichment directory: {figures_dir}/enrichment")
+else:
+    print(f"[SUCCESS] Figures enrichment directory already exists.")
+
+
 
 if all_present:
     print(f"[ALL SUCCEEDED] All necessary data/directories present.")
