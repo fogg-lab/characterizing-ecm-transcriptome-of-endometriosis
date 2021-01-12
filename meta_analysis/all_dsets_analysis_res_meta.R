@@ -60,7 +60,7 @@ for (dset_idx in 1:3) {
     norm_counts_df <- read_tsv(paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/", "norm_counts.tsv"))
 
     #region DEG
-    DESeq_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_DESeq_results.tsv"))
+    DESeq_results_df <- read_tsv(paste0(dirs$analysis_dir, "/deg/", unified_dsets[dset_idx], "_DESeq_results.tsv"))
     filtered_DESeq_results_df <- DESeq_results_df %>%
         dplyr::filter(abs(log2FoldChange) > lfc_thresh, padj < p_thresh)
     filtered_matrisome_DESeq_results_df <- filtered_DESeq_results_df %>%
