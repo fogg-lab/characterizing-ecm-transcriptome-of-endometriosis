@@ -82,7 +82,7 @@ for (dset_idx in 1:3) {
 
     #region Cox PH
     coxph_null_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/meta/", "coxph_null_scores.tsv"))
-    coxph_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_coxph_results.tsv"))
+    coxph_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_coxph_results.tsv"))
     filtered_coxph_results_df <- coxph_results_df %>%
         dplyr::filter(gene_pval < p_thresh)
     

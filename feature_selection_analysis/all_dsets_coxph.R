@@ -85,7 +85,7 @@ for (dset_idx in 1:3) {
         dplyr::mutate(gene_padj = p.adjust(gene_pval, method = "BH"))
 
     # Save results
-    write_tsv(cox_regression_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_coxph_results.tsv"))
+    write_tsv(cox_regression_df, paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_coxph_results.tsv"))
 
 }
 
