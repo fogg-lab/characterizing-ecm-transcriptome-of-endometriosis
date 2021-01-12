@@ -55,6 +55,13 @@ if not os.path.exists(analysis_dir):
 else:
     print(f"[SUCCESS] Analysis directory already exists.")
 
+# Check existence of analysis/deg directory
+if not os.path.exists(f"{analysis_dir}/deg"):
+    os.makedirs(f"{analysis_dir}/deg")
+    print(f"[SUCCESS] Created analysis/deg directory: {analysis_dir}/deg")
+else:
+    print(f"[SUCCESS] Analysis deg directory already exists.")
+
 # Check existence of analysis/meta directory
 if not os.path.exists(f"{analysis_dir}/meta"):
     os.makedirs(f"{analysis_dir}/meta")
@@ -96,6 +103,13 @@ if not os.path.exists(f"{figures_dir}/network"):
     print(f"[SUCCESS] Created figures/network directory: {figures_dir}/network")
 else:
     print(f"[SUCCESS] Figures network directory already exists.")
+
+# Check existence of figures/deg directory
+if not os.path.exists(f"{figures_dir}/deg"):
+    os.makedirs(f"{figures_dir}/deg")
+    print(f"[SUCCESS] Created figures/deg directory: {figures_dir}/deg")
+else:
+    print(f"[SUCCESS] Figures deg directory already exists.")
 
 # Check existence of figures/enrichment directory
 if not os.path.exists(f"{figures_dir}/enrichment"):

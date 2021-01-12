@@ -79,5 +79,5 @@ for (dset_idx in 1:3) {
         dplyr::mutate(qval = WGCNA::qvalue(pvalue)$qvalues)
 
     # Save results
-    write_tsv(dge_res_df, paste0(dirs$analysis_dir, "/", dsets[dset_idx], "_DESeq_results.tsv"))
+    write_tsv(dge_res_df, paste0(dirs$analysis_dir, "/deg/", dsets[dset_idx], "_DESeq_results.tsv"))
 }
