@@ -128,7 +128,7 @@ for (dset_idx in 1:3) {
 
     #region Classification
     ## ANOVA (FIGO)
-    anova_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
+    anova_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
     filtered_anova_results_df <- anova_results_df %>% dplyr::filter(padj < p_thresh)
 
     n_anov_sig <- nrow(filtered_anova_results_df)
