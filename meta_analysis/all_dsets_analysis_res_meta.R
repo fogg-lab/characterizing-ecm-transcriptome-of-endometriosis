@@ -111,7 +111,7 @@ for (dset_idx in 1:3) {
         add_column(!!dset := c(n_cor, n_cor_down, n_cor_up))
 
     ## MI (survival)
-    mi_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_MI_survival_results.tsv"))
+    mi_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_MI_survival_results.tsv"))
     filtered_mi_results_df <- mi_results_df %>% dplyr::filter(MI_est_median > 0)
 
     n_mi <- nrow(filtered_mi_results_df)
