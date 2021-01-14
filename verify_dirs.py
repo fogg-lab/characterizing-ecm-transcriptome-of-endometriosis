@@ -62,13 +62,19 @@ if not os.path.exists(f"{analysis_dir}/deg"):
 else:
     print(f"[SUCCESS] Analysis deg directory already exists.")
 
+# Check existence of analysis/model_opt directory
+if not os.path.exists(f"{analysis_dir}/model_opt"):
+    os.makedirs(f"{analysis_dir}/model_opt")
+    print(f"[SUCCESS] Created analysis/model_opt directory: {analysis_dir}/model_opt")
+else:
+    print(f"[SUCCESS] Analysis model_opt directory already exists.")
+
 # Check existence of analysis/feature_selection directory
 if not os.path.exists(f"{analysis_dir}/feature_selection"):
     os.makedirs(f"{analysis_dir}/feature_selection")
     print(f"[SUCCESS] Created analysis/feature_selection directory: {analysis_dir}/feature_selection")
 else:
     print(f"[SUCCESS] Analysis feature_selection directory already exists.")
-
 
 # Check existence of analysis/meta directory
 if not os.path.exists(f"{analysis_dir}/meta"):

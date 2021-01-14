@@ -69,6 +69,7 @@ space = [
 n_initial = 10 * (len(space))
 n_calls = 50 * (len(space))
 
+scoring_method = "neg_mean_squared_error"
 
 def main():
     # Train models
@@ -101,13 +102,8 @@ def main():
 
         # Optimize models
         run_optimization(
-            x_df, y_df, space, "ls", "explained_variance", rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv"
-        )
-
-        run_optimization(
-            x_df, y_df, space, "lad", "neg_mean_absolute_error", rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv"
+            x_df, y_df, space, "ls", scoring_method, rand, n_initial, n_calls,
+            f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbr_h_params_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

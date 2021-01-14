@@ -13,7 +13,7 @@ import utils.feature_selection as feat_sel
 
 
 # Helper functions
-def run_optimization(x_df, y_df, n_components_range, scoring, dset_idx):
+def run_optimization(x_df, y_df, n_components_range, scoring, dset_idx, gene_names):
     plsr_model = PLSRegression(scale=False)
     # Does worse with pre-processing, so just going to use vanilla
     plsr_pipeline = make_pipeline(plsr_model)
@@ -26,17 +26,17 @@ def run_optimization(x_df, y_df, n_components_range, scoring, dset_idx):
 
     # Save optimal h_params
     plsr_h_params_df = pd.DataFrame({"n_components": [best_plsr.n_components], "loss_achieved": [cv_score.mean()]})
-    plsr_h_params_df.to_csv(f"{unified_dsets[dset_idx]}_opt_plsr_h_params_{scoring}.tsv", sep="\t", index=False)
+    plsr_h_params_df.to_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_plsr_h_params_{scoring}.tsv", sep="\t", index=False)
 
     # Save VIP results
     vip = feat_sel.VIP(best_plsr)
-    non_gene_vars = list(x_df.drop(list(norm_filtered_matrisome_counts_t_df.columns[1:]), axis=1).columns)
+    non_gene_vars = list(x_df.drop(gene_names, axis=1).columns)
     plsr_res_df = (
         pd.DataFrame({"geneID": x_df.columns, "vip_scores": vip, "coeff": best_plsr.coef_.squeeze()})
             .pipe(lambda x: x[~x.geneID.isin(non_gene_vars)])
             .reset_index(drop=True)
     )
-    plsr_res_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_plsr_{scoring}_results.tsv", sep="\t", index=False)
+    plsr_res_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_plsr_{scoring}_results.tsv", sep="\t", index=False)
 
 
 # Define constants and load data
@@ -80,9 +80,12 @@ def main():
         rand.seed(seed)
         x_df, y_df = prep.shuffle_data(joined_df, rand)
 
+        gene_names = list(norm_filtered_matrisome_counts_t_df.columns[1:])
+
         # Optimize models
-        run_optimization(x_df, y_df, range(2, 20), "neg_mean_absolute_error", dset_idx)
-        run_optimization(x_df, y_df, range(2, 20), "explained_variance", dset_idx)
+        # run_optimization(x_df, y_df, range(2, 20), "neg_mean_absolute_error", dset_idx, gene_names)
+        # run_optimization(x_df, y_df, range(2, 20), "explained_variance", dset_idx, gene_names)
+        run_optimization(x_df, y_df, range(2, 20), "neg_mean_squared_error", dset_idx, gene_names)
 
 
 if __name__ == "__main__":

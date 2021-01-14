@@ -103,11 +103,6 @@ def main():
         x_df, y_df = prep.shuffle_data(joined_df, rand)
 
         # Optimize models
-        # run_optimization(
-        #     x_df, y_df, space, "deviance", "f1_weighted", rand, n_initial, n_calls,
-        #     f"{unified_dsets[dset_idx]}_opt_gbc_h_params_f1_weighted.tsv"
-        # )
-
         run_optimization(
             x_df, y_df, space, "deviance", scoring_method, rand, n_initial, n_calls,
             f"{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv"
