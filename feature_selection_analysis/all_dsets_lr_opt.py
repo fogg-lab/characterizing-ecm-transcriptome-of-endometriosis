@@ -126,7 +126,7 @@ def main():
         # Optimize models
         run_optimization(
             x_df, y_df, l1_space, "l1", scoring_method, rand, matrisome_genes, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_lr_h_params_l1_{scoring_method}.tsv"
+            f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_lr_h_params_l1_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

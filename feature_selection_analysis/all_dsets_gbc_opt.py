@@ -105,7 +105,7 @@ def main():
         # Optimize models
         run_optimization(
             x_df, y_df, space, "deviance", scoring_method, rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv"
+            f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

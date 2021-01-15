@@ -98,11 +98,10 @@ def main():
 
         run_optimization(
             x_df, y_df, space, scoring_method, rand, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_rfc_cancer_y_n_h_params_{scoring_method}.tsv"
+            f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfc_cancer_y_n_h_params_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
-
 
 
 if __name__ == "__main__":
