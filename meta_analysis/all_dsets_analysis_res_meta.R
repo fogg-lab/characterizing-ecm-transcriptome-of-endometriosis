@@ -22,6 +22,9 @@ matrisome_list <- paste0(dirs$data_dir, "/matrisome/matrisome_hs_masterlist.tsv"
 p_thresh = 0.05
 lfc_thresh = log2(2)
 coxph_coeff_thresh = 0.0
+mi_thresh = 0.0
+consensus_thresh = 0.0
+consensus_n = 5
 
 matrisome_df <- rutils::load_matrisome_df(matrisome_list) %>%
     dplyr::select(gene_symbol, division, category)
@@ -39,17 +42,23 @@ cor_meta_df <- tibble(
 mi_survival_meta_df <- tibble(
     "item" = c("n_mi")
 )
+mse_gbr_meta_df <- tibble(
+    "item" = c("mse_gbr_avg", "mse_gbr_imp", "mse_gbr_pct_imp", "n_mse_gbr_consensus_genes", "mse_baseline")
+)
+mse_rfr_meta_df <- tibble(
+    "item" = c("mse_rfr_avg", "mse_rfr_imp", "mse_rfr_pct_imp", "n_mse_rfr_consensus_genes", "mse_baseline")
+)
 anova_meta_df <- tibble(
     "item" = c("n_sig")
 )
 mi_figo_meta_df <- tibble(
     "item" = c("n_mi")
 )
-anova_meta_df <- tibble(
-    "item" = c("n_sig")
-)
 f1_gbc_meta_df <- tibble(
     "item" = c("f1_gbc_avg", "f1_gbc_imp", "f1_gbc_pct_imp", "n_f1_gbc_consensus_genes", "baseline")
+)
+f1_rfc_meta_df <- tibble(
+    "item" = c("f1_rfc_avg", "f1_rfc_imp", "f1_rfc_pct_imp", "n_f1_rfc_consensus_genes", "baseline")
 )
 f1_l1_lr_meta_df <- tibble(
     "item" = c("f1_l1_lr_avg", "f1_l1_lr_imp", "f1_l1_lr_pct_imp", "n_f1_l1_lr_consensus_genes", "baseline")
@@ -62,7 +71,7 @@ for (dset_idx in 1:3) {
     #region DEG
     DESeq_results_df <- read_tsv(paste0(dirs$analysis_dir, "/deg/", unified_dsets[dset_idx], "_DESeq_results.tsv"))
     filtered_DESeq_results_df <- DESeq_results_df %>%
-        dplyr::filter(abs(log2FoldChange) > lfc_thresh, padj < p_thresh)
+        dplyr::filter(abs(log2FoldChange) > lfc_thresh, qval < p_thresh)
     filtered_matrisome_DESeq_results_df <- filtered_DESeq_results_df %>%
         dplyr::filter(geneID %in% matrisome_df$gene_symbol)
 
@@ -84,7 +93,7 @@ for (dset_idx in 1:3) {
     coxph_null_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/meta/", "coxph_null_scores.tsv"))
     coxph_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_coxph_results.tsv"))
     filtered_coxph_results_df <- coxph_results_df %>%
-        dplyr::filter(gene_pval < p_thresh)
+        dplyr::filter(gene_qval < p_thresh)
     
     coxph_null_sig <- (coxph_null_scores_df %>% dplyr::filter(dataset == unified_dsets[dset_idx]))$lr_test_pval < p_thresh
     n_coxph_sig <- nrow(filtered_coxph_results_df)
@@ -100,7 +109,7 @@ for (dset_idx in 1:3) {
     #region Regression
     ## Correlation
     cor_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_cor_results.tsv"))
-    filtered_cor_results_df <- cor_results_df %>% dplyr::filter(padj < p_thresh)
+    filtered_cor_results_df <- cor_results_df %>% dplyr::filter(qval < p_thresh)
 
     n_cor <- nrow(filtered_cor_results_df)
     n_cor_down <- nrow(filtered_cor_results_df %>% dplyr::filter(cor < 0))
@@ -123,13 +132,46 @@ for (dset_idx in 1:3) {
     ## Baselines
     reg_baselines_df <- read_tsv(paste0(dirs$analysis_dir, "/meta/", "reg_baselines.tsv"))
     mae_baseline = (reg_baselines_df %>% filter(dataset == unified_dsets[dset_idx]))$L1
+    mse_baseline = (reg_baselines_df %>% filter(dataset == unified_dsets[dset_idx]))$L2
     ev_baseline = (reg_baselines_df %>% filter(dataset == unified_dsets[dset_idx]))$explained_variance
+
+    ## GBR (MSE)
+    mse_gbr_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_mse_gbr_ref_scores.tsv"))
+    mse_gbr_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_mse_gbr_results.tsv"))
+    mse_gbr_results_df <- get_consensus_col(mse_gbr_results_df, n = consensus_n, thresh = consensus_thresh)
+
+    # mult. by -1 to convert neg MSE -> MSE
+    mse_gbr_avg <- mean(-mse_gbr_scores_df$ref_score)
+    mse_gbr_imp <- mse_gbr_avg < mse_baseline
+    # mult. by -1 since pct. "improvement" is pct. reduction in this case
+    mse_gbr_pct_imp <- - (mse_gbr_avg - mse_baseline) / mse_baseline * 100
+    n_mse_gbr_consensus_genes <- nrow(mse_gbr_results_df %>% dplyr::filter(consensus == TRUE))
+
+    dset <- unified_dsets[dset_idx]
+    mse_gbr_meta_df <- mse_gbr_meta_df %>%
+        add_column(!!dset := c(mse_gbr_avg, mse_gbr_imp, mse_gbr_pct_imp, n_mse_gbr_consensus_genes, mse_baseline))
+
+    ## RFR (MSE)
+    mse_rfr_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_mse_rfr_ref_scores.tsv"))
+    mse_rfr_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_mse_rfr_results.tsv"))
+    mse_rfr_results_df <- get_consensus_col(mse_rfr_results_df, n = consensus_n, thresh = consensus_thresh)
+
+    # mult. by -1 to convert neg MSE -> MSE
+    mse_rfr_avg <- mean(-mse_rfr_scores_df$ref_score)
+    mse_rfr_imp <- mse_rfr_avg < mse_baseline
+    # mult. by -1 since pct. "improvement" is pct. reduction in this case
+    mse_rfr_pct_imp <- - (mse_rfr_avg - mse_baseline) / mse_baseline * 100
+    n_mse_rfr_consensus_genes <- nrow(mse_rfr_results_df %>% dplyr::filter(consensus == TRUE))
+
+    dset <- unified_dsets[dset_idx]
+    mse_rfr_meta_df <- mse_rfr_meta_df %>%
+        add_column(!!dset := c(mse_rfr_avg, mse_rfr_imp, mse_rfr_pct_imp, n_mse_rfr_consensus_genes, mse_baseline))
     #endregion
 
     #region Classification
     ## ANOVA (FIGO)
     anova_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
-    filtered_anova_results_df <- anova_results_df %>% dplyr::filter(padj < p_thresh)
+    filtered_anova_results_df <- anova_results_df %>% dplyr::filter(qval < p_thresh)
 
     n_anov_sig <- nrow(filtered_anova_results_df)
 
@@ -153,27 +195,41 @@ for (dset_idx in 1:3) {
     f1_macro_MC_baseline <- (cls_baselines_df %>% filter(dataset == unified_dsets[dset_idx]))$f1_macro_MC
 
     ## GBC (F1)
-    f1_gbc_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_gbc_ref_scores.tsv"))
-    f1_gbc_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_gbc_results.tsv"))
-    f1_gbc_results_df <- get_consensus_col(f1_gbc_results_df, 5, thresh = 0)
+    f1_gbc_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_gbc_ref_scores.tsv"))
+    f1_gbc_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_gbc_results.tsv"))
+    f1_gbc_results_df <- get_consensus_col(f1_gbc_results_df, n = consensus_n, thresh = consensus_thresh)
 
     f1_gbc_avg <- mean(f1_gbc_scores_df$ref_score)
     f1_gbc_imp <- f1_gbc_avg > f1_macro_MC_baseline
-    f1_gbc_pct_imp <- (f1_gbc_avg - f1_macro_MC_baseline) / f1_macro_MC_baseline
+    f1_gbc_pct_imp <- (f1_gbc_avg - f1_macro_MC_baseline) / f1_macro_MC_baseline * 100
     n_f1_gbc_consensus_genes <- nrow(f1_gbc_results_df %>% dplyr::filter(consensus == TRUE))
 
     dset <- unified_dsets[dset_idx]
     f1_gbc_meta_df <- f1_gbc_meta_df %>%
         add_column(!!dset := c(f1_gbc_avg, f1_gbc_imp, f1_gbc_pct_imp, n_f1_gbc_consensus_genes, f1_macro_MC_baseline))
 
-    ## LR (L1)
-    f1_l1_lr_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_l1_lr_ref_scores.tsv"))
-    f1_l1_lr_results_df <- read_tsv(paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_l1_lr_results.tsv"))
-    f1_l1_lr_results_df <- get_consensus_col(f1_l1_lr_results_df, 5, thresh = 0)
+    ## RFC (F1)
+    f1_rfc_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_rfc_ref_scores.tsv"))
+    f1_rfc_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_rfc_results.tsv"))
+    f1_rfc_results_df <- get_consensus_col(f1_rfc_results_df, n = consensus_n, thresh = consensus_thresh)
+
+    f1_rfc_avg <- mean(f1_rfc_scores_df$ref_score)
+    f1_rfc_imp <- f1_rfc_avg > f1_macro_MC_baseline
+    f1_rfc_pct_imp <- (f1_rfc_avg - f1_macro_MC_baseline) / f1_macro_MC_baseline * 100
+    n_f1_rfc_consensus_genes <- nrow(f1_rfc_results_df %>% dplyr::filter(consensus == TRUE))
+
+    dset <- unified_dsets[dset_idx]
+    f1_rfc_meta_df <- f1_rfc_meta_df %>%
+        add_column(!!dset := c(f1_rfc_avg, f1_rfc_imp, f1_rfc_pct_imp, n_f1_rfc_consensus_genes, f1_macro_MC_baseline))
+
+    ## L1 LR (F1)
+    f1_l1_lr_scores_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_l1_lr_ref_scores.tsv"))
+    f1_l1_lr_results_df <- read_tsv(paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_l1_lr_results.tsv"))
+    f1_l1_lr_results_df <- get_consensus_col(f1_l1_lr_results_df, n = consensus_n, thresh = consensus_thresh)
 
     f1_l1_lr_avg <- mean(f1_l1_lr_scores_df$ref_score)
     f1_l1_lr_imp <- f1_l1_lr_avg > f1_macro_MC_baseline
-    f1_l1_lr_pct_imp <- (f1_l1_lr_avg - f1_macro_MC_baseline) / f1_macro_MC_baseline
+    f1_l1_lr_pct_imp <- (f1_l1_lr_avg - f1_macro_MC_baseline) / f1_macro_MC_baseline * 100
     n_f1_l1_lr_consensus_genes <- nrow(f1_l1_lr_results_df %>% dplyr::filter(consensus == TRUE))
 
     dset <- unified_dsets[dset_idx]
@@ -187,8 +243,11 @@ write_tsv(deg_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$a
 write_tsv(coxph_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_coxph_meta.tsv"))
 write_tsv(cor_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_cor_meta.tsv"))
 write_tsv(mi_survival_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mi_survival_meta.tsv"))
+write_tsv(mse_gbr_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mse_gbr_meta.tsv"))
+write_tsv(mse_rfr_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mse_rfr_meta.tsv"))
 write_tsv(anova_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_anova_meta.tsv"))
 write_tsv(mi_figo_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_mi_figo_meta.tsv"))
 write_tsv(f1_gbc_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_f1_gbc_meta.tsv"))
+write_tsv(f1_rfc_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_f1_rfc_meta.tsv"))
 write_tsv(f1_l1_lr_meta_df %>% rutils::transpose_df("item", "dataset"), paste0(dirs$analysis_dir, "/meta/", "fs_f1_l1_lr_meta.tsv"))
 #endregion
