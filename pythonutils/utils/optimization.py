@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import OptimizeResult
-from sklearn.metrics import mean_absolute_error, explained_variance_score, f1_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, explained_variance_score, f1_score
 from sklearn.model_selection import cross_val_score, KFold
 from sklearn.inspection import permutation_importance
 from numpy.random import RandomState
@@ -10,6 +10,7 @@ from typing import Optional, Tuple, List
 
 scoring_metrics = {
     "neg_mean_absolute_error": lambda y_true, y_pred: -mean_absolute_error(y_true, y_pred),
+    "neg_mean_squared_error": lambda y_true, y_pred: -mean_squared_error(y_true, y_pred),
     "explained_variance": explained_variance_score,
     "f1_weighted": lambda y_true, y_pred: f1_score(y_true, y_pred, average="weighted"),
     "f1_macro": lambda y_true, y_pred: f1_score(y_true, y_pred, average="macro")

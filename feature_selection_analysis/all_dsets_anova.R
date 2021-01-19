@@ -40,7 +40,7 @@ for (dset_idx in 1:3) {
     # Some genes contain the '-' symbol, which affects formulae
     colnames(joined_df) <- gsub("-", "_", colnames(joined_df))
 
-    # Perform Welch ANOVA for each gene and apply BH adjustment to p-values
+    # Perform Welch ANOVA for each gene and adjust p-values
     gene_names <- colnames(joined_df[-c(1:2)])
     # waov_df <- tibble(geneID = c(), pval = c())
 
@@ -51,5 +51,5 @@ for (dset_idx in 1:3) {
     # Re-sub '-' symbol
     waov_df$geneID <- gsub("_", "-", waov_df$geneID)
 
-    write_tsv(waov_df, paste0(dirs$analysis_dir, "/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
+    write_tsv(waov_df, paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_welch_anova_results.tsv"))
 }

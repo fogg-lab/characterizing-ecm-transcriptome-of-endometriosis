@@ -107,7 +107,7 @@ def main():
         # Optimize models
         run_optimization(
             x_df, y_df, elasticnet_space, "elasticnet", scoring_method, rand, matrisome_genes, n_initial, n_calls,
-            f"{unified_dsets[dset_idx]}_opt_lr_cancer_y_n_h_params_elasticnet_{scoring_method}.tsv"
+            f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_lr_cancer_y_n_h_params_elasticnet_{scoring_method}.tsv"
         )
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")

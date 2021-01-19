@@ -60,7 +60,7 @@ def main():
         mi_df["MI_est_median"] = mi_df.iloc[:, 1:].median(axis=1)
         
         # Save results
-        mi_df[["geneID", "MI_est_median"]].to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_MI_figo_results.tsv", sep="\t", index=False)
+        mi_df[["geneID", "MI_est_median"]].to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_MI_figo_results.tsv", sep="\t", index=False)
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
 

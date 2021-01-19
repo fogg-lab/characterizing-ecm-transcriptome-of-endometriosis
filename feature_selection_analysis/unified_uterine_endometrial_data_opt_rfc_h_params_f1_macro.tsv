@@ -1,6 +1,0 @@
-n_estimators	max_depth	max_features	min_samples_split	min_samples_leaf	bootstrap	loss_achieved
-100	10	log2	2	3	False	-0.31723366421055765
-105	32	sqrt	4	3	True	-0.3006204614099351
-105	11	auto	3	3	False	-0.3031971493377519
-146	10	sqrt	3	2	False	-0.3031761837024995
-100	100	sqrt	3	3	False	-0.3223160173160173

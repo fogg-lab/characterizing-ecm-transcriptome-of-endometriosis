@@ -41,12 +41,6 @@ def merge_perm_results(perm_res_dfs):
     merge_df = perm_res_dfs[0]
     for i in range(1, len(perm_res_dfs)):
         merge_df = merge_df.merge(perm_res_dfs[i], on = "geneID", how = "inner")
-    # merge_df = (
-    #     merge_df.assign(consensus_imp_mean = merge_df.filter(regex="mean_imp").mean(axis=1))
-    #         .assign(consensus_imp_std = merge_df.filter(regex="mean_imp").std(axis=1))
-    # )
-    # merge_df = merge_df.assign(consensus_imp_cv = merge_df.consensus_imp_std / merge_df.consensus_imp_mean)
-    # merge_df["consensus_vote"] = (merge_df.set_index("geneID").filter(regex="mean_imp", axis=1) > 0).all(axis=1).values
     return merge_df
 
 
@@ -92,73 +86,40 @@ def main():
         x_df, y_df = prep.shuffle_data(joined_df, rand)
 
         # Build models
-        ev_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_explained_variance.tsv", sep="\t")
-        ev_gbrs = [
+        mse_gbr_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_squared_error.tsv", sep="\t")
+        mse_gbrs = [
             GradientBoostingRegressor(
-                **dict(zip(ev_gbr_h_param_df.columns[:-1], ev_gbr_h_param_df.iloc[i, :-1])), loss="ls", random_state=rand
-            ) for i in range(ev_gbr_h_param_df.shape[0])
+                **dict(zip(mse_gbr_h_param_df.columns[:-1], mse_gbr_h_param_df.iloc[i, :-1])), loss="ls", random_state=rand
+            ) for i in range(mse_gbr_h_param_df.shape[0])
         ]
 
-        mae_gbr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_gbr_h_params_neg_mean_absolute_error.tsv", sep="\t")
-        mae_gbrs = [
-            GradientBoostingRegressor(
-                **dict(zip(mae_gbr_h_param_df.columns[:-1], mae_gbr_h_param_df.iloc[i, :-1])), loss="lad", random_state=rand
-            ) for i in range(mae_gbr_h_param_df.shape[0])
-        ]
-
-        ev_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_explained_variance.tsv", sep="\t")
-        ev_rfrs = [
+        mse_rfr_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfr_h_params_neg_mean_squared_error.tsv", sep="\t")
+        mse_rfrs = [
             RandomForestRegressor(
-                **dict(zip(ev_rfr_h_param_df.columns[:-1], ev_rfr_h_param_df.iloc[i, :-1])), random_state=rand
-            ) for i in range(ev_rfr_h_param_df.shape[0])
+                **dict(zip(mse_rfr_h_param_df.columns[:-1], mse_rfr_h_param_df.iloc[i, :-1])), random_state=rand
+            ) for i in range(mse_rfr_h_param_df.shape[0])
         ]
 
-        mae_rfr_h_param_df = pd.read_csv(f"{unified_dsets[dset_idx]}_opt_rfr_h_params_neg_mean_absolute_error.tsv", sep="\t")
-        mae_rfrs = [
-            RandomForestRegressor(
-                **dict(zip(mae_rfr_h_param_df.columns[:-1], mae_rfr_h_param_df.iloc[i, :-1])), random_state=rand
-            ) for i in range(mae_rfr_h_param_df.shape[0])
-        ]
-
-        # GBR (EV)
-        ev_gbr_mean_perm_res, ev_gbr_ref_scores, ev_gbr_perm_res_dfs = collect_feature_perm_results(
-            ev_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
+        # Model feature perm.
+        # GBR (MSE)
+        mse_gbr_mean_perm_res, mse_gbr_ref_scores, mse_gbr_perm_res_dfs = collect_feature_perm_results(
+            mse_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_squared_error"
         )
-        ev_gbr_merge_df = merge_perm_results(ev_gbr_perm_res_dfs)
-        ev_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_results.tsv", sep="\t", index=False)
-        ev_gbr_mean_ref_scores = np.array(ev_gbr_ref_scores).mean(axis=1)
-        ev_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_gbr_mean_ref_scores)), "ref_score": ev_gbr_mean_ref_scores})
-        ev_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_gbr_ref_scores.tsv", sep="\t", index=False)
+        mse_gbr_merge_df = merge_perm_results(mse_gbr_perm_res_dfs)
+        mse_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_mse_gbr_results.tsv", sep="\t", index=False)
+        mse_gbr_mean_ref_scores = np.array(mse_gbr_ref_scores).mean(axis=1)
+        mse_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mse_gbr_mean_ref_scores)), "ref_score": mse_gbr_mean_ref_scores})
+        mse_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_mse_gbr_ref_scores.tsv", sep="\t", index=False)
 
-        # GBR (MAE)
-        mae_gbr_mean_perm_res, mae_gbr_ref_scores, mae_gbr_perm_res_dfs = collect_feature_perm_results(
-            mae_gbrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
+        # RFR (MSE)
+        mse_rfr_mean_perm_res, mse_rfr_ref_scores, mse_rfr_perm_res_dfs = collect_feature_perm_results(
+            mse_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_squared_error"
         )
-        mae_gbr_merge_df = merge_perm_results(mae_gbr_perm_res_dfs)
-        mae_gbr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_results.tsv", sep="\t", index=False)
-        mae_gbr_mean_ref_scores = np.array(mae_gbr_ref_scores).mean(axis=1)
-        mae_gbr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_gbr_mean_ref_scores)), "ref_score": mae_gbr_mean_ref_scores})
-        mae_gbr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_gbr_ref_scores.tsv", sep="\t", index=False)
-
-        # RFR (EV)
-        ev_rfr_mean_perm_res, ev_rfr_ref_scores, ev_rfr_perm_res_dfs = collect_feature_perm_results(
-            ev_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "explained_variance"
-        )
-        ev_rfr_merge_df = merge_perm_results(ev_rfr_perm_res_dfs)
-        ev_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_results.tsv", sep="\t", index=False)
-        ev_rfr_mean_ref_scores = np.array(ev_rfr_ref_scores).mean(axis=1)
-        ev_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(ev_rfr_mean_ref_scores)), "ref_score": ev_rfr_mean_ref_scores})
-        ev_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_ev_rfr_ref_scores.tsv", sep="\t", index=False)
-
-        # RFR (MAE)
-        mae_rfr_mean_perm_res, mae_rfr_ref_scores, mae_rfr_perm_res_dfs = collect_feature_perm_results(
-            mae_rfrs, x_df, y_df, rand, norm_filtered_matrisome_counts_t_df.columns[1:], "neg_mean_absolute_error"
-        )
-        mae_rfr_merge_df = merge_perm_results(mae_rfr_perm_res_dfs)
-        mae_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_results.tsv", sep="\t", index=False)
-        mae_rfr_mean_ref_scores = np.array(mae_rfr_ref_scores).mean(axis=1)
-        mae_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mae_rfr_mean_ref_scores)), "ref_score": mae_rfr_mean_ref_scores})
-        mae_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/{unified_dsets[dset_idx]}_mae_rfr_ref_scores.tsv", sep="\t", index=False)
+        mse_rfr_merge_df = merge_perm_results(mse_rfr_perm_res_dfs)
+        mse_rfr_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_mse_rfr_results.tsv", sep="\t", index=False)
+        mse_rfr_mean_ref_scores = np.array(mse_rfr_ref_scores).mean(axis=1)
+        mse_rfr_mean_ref_scores_df = pd.DataFrame({"model": range(len(mse_rfr_mean_ref_scores)), "ref_score": mse_rfr_mean_ref_scores})
+        mse_rfr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_mse_rfr_ref_scores.tsv", sep="\t", index=False)
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
 
