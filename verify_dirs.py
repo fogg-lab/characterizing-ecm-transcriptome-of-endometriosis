@@ -111,6 +111,14 @@ if not os.path.exists(figures_dir):
 else:
     print(f"[SUCCESS] Figures directory already exists.")
 
+# Check existence of figures/TCGA_overview directory
+if not os.path.exists(f"{figures_dir}/TCGA_overview"):
+    os.makedirs(f"{figures_dir}/TCGA_overview")
+    print(f"[SUCCESS] Created figures/TCGA_overview directory: {figures_dir}/TCGA_overview")
+else:
+    print(f"[SUCCESS] Figures TCGA_overview directory already exists.")
+
+
 # Check existence of figures/network directory
 if not os.path.exists(f"{figures_dir}/network"):
     os.makedirs(f"{figures_dir}/network")
