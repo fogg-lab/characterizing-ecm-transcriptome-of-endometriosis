@@ -5,3 +5,6 @@ pythonutils.egg-info/dependency_links.txt
 pythonutils.egg-info/top_level.txt
 utils/__init__.py
 utils/dev_config.py
+utils/feature_selection.py
+utils/optimization.py
+utils/preprocessing.py

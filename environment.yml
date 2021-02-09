@@ -1,4 +1,4 @@
-name: TCGA-round1
+name: gyn-mat-env
 channels:
   - r
   - conda-forge
