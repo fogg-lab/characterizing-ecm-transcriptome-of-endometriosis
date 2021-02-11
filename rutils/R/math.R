@@ -75,6 +75,20 @@ colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH")
 }
 
 
+colwise_t_test <- function(df, dep_var, cols, colnames_col, adjust_method = "BH") {
+    pvals <- rep(0, length(cols))
+    for (i in seq_len(length(cols))) {
+        formula_str <- paste0(cols[i], " ~ ", dep_var)
+        welch_t_res <- t.test(as.formula(formula_str), data = df, )
+        pvals[i] <- welch_t_res$p.value
+    }
+    welch_t_df <- tibble(!!as.name(colnames_col) := cols) %>%
+        dplyr::mutate(pval = pvals) %>%
+        dplyr::mutate(padj = p.adjust(pval, method = adjust_method))
+    return(welch_t_df)
+}
+
+
 get_most_conn_genes <- function(data_expr, module_colors, soft_power, type = "unsigned", conn_vs_hub_thresh = 0.5) {
     hub_ls <- list()
     for (mc in unique(module_colors)) {
