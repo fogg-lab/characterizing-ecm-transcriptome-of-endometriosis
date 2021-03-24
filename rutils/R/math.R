@@ -60,10 +60,10 @@ critical_r <- function(n, alpha = .05) {
 }
 
 
-colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH") {
+colwise_anova <- function(df, group_var, cols, colnames_col, adjust_method = "BH") {
     pvals <- rep(0, length(cols))
     for (i in seq_len(length(cols))) {
-        formula_str <- paste0(cols[i], " ~ ", dep_var)
+        formula_str <- paste0(cols[i], " ~ ", group_var)
         aov_res <- oneway.test(as.formula(formula_str), data = df)
         pvals[i] <- aov_res$p.value
     }
@@ -75,10 +75,10 @@ colwise_anova <- function(df, dep_var, cols, colnames_col, adjust_method = "BH")
 }
 
 
-colwise_t_test <- function(df, dep_var, cols, colnames_col, adjust_method = "BH") {
+colwise_t_test <- function(df, group_var, cols, colnames_col, adjust_method = "BH") {
     pvals <- rep(0, length(cols))
     for (i in seq_len(length(cols))) {
-        formula_str <- paste0(cols[i], " ~ ", dep_var)
+        formula_str <- paste0(cols[i], " ~ ", group_var)
         welch_t_res <- t.test(as.formula(formula_str), data = df, )
         pvals[i] <- welch_t_res$p.value
     }
