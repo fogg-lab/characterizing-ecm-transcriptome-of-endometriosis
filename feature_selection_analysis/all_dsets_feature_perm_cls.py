@@ -119,19 +119,19 @@ def main():
             }
             l1_lrs.append(make_lr(l1_lr_h_params, matrisome_genes))
 
-        gbc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv", sep="\t")
-        gbcs = [
-            GradientBoostingClassifier(
-                **dict(zip(gbc_h_param_df.columns[:-1], gbc_h_param_df.iloc[i, :-1])), loss="deviance", random_state=rand
-            ) for i in range(gbc_h_param_df.shape[0])
-        ]
+        # gbc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv", sep="\t")
+        # gbcs = [
+        #     GradientBoostingClassifier(
+        #         **dict(zip(gbc_h_param_df.columns[:-1], gbc_h_param_df.iloc[i, :-1])), loss="deviance", random_state=rand
+        #     ) for i in range(gbc_h_param_df.shape[0])
+        # ]
 
-        rfc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfc_h_params_{scoring_method}.tsv", sep="\t")
-        rfcs = [
-            RandomForestClassifier(
-                **dict(zip(rfc_h_param_df.columns[:-1], rfc_h_param_df.iloc[i, :-1])), random_state=rand, n_jobs=-1
-            ) for i in range(rfc_h_param_df.shape[0])
-        ]
+        # rfc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfc_h_params_{scoring_method}.tsv", sep="\t")
+        # rfcs = [
+        #     RandomForestClassifier(
+        #         **dict(zip(rfc_h_param_df.columns[:-1], rfc_h_param_df.iloc[i, :-1])), random_state=rand, n_jobs=-1
+        #     ) for i in range(rfc_h_param_df.shape[0])
+        # ]
 
         # Model feature perm.
         # LR (L1)
@@ -144,25 +144,25 @@ def main():
         l1_lr_mean_ref_scores_df = pd.DataFrame({"model": range(len(l1_lr_mean_ref_scores)), "ref_score": l1_lr_mean_ref_scores})
         l1_lr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_l1_lr_ref_scores.tsv", sep="\t", index=False)
 
-        # GBC
-        gbc_mean_perm_res, gbc_ref_scores, gbc_perm_res_dfs = collect_feature_perm_results(
-            gbcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
-        )
-        gbc_merge_df = merge_perm_results(gbc_perm_res_dfs)
-        gbc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_results.tsv", sep="\t", index=False)
-        gbc_mean_ref_scores = np.array(gbc_ref_scores).mean(axis=1)
-        gbc_mean_ref_scores_df = pd.DataFrame({"model": range(len(gbc_mean_ref_scores)), "ref_score": gbc_mean_ref_scores})
-        gbc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_ref_scores.tsv", sep="\t", index=False)
+        # # GBC
+        # gbc_mean_perm_res, gbc_ref_scores, gbc_perm_res_dfs = collect_feature_perm_results(
+        #     gbcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
+        # )
+        # gbc_merge_df = merge_perm_results(gbc_perm_res_dfs)
+        # gbc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_results.tsv", sep="\t", index=False)
+        # gbc_mean_ref_scores = np.array(gbc_ref_scores).mean(axis=1)
+        # gbc_mean_ref_scores_df = pd.DataFrame({"model": range(len(gbc_mean_ref_scores)), "ref_score": gbc_mean_ref_scores})
+        # gbc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_ref_scores.tsv", sep="\t", index=False)
 
-        # RFC
-        rfc_mean_perm_res, rfc_ref_scores, rfc_perm_res_dfs = collect_feature_perm_results(
-            rfcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
-        )
-        rfc_merge_df = merge_perm_results(rfc_perm_res_dfs)
-        rfc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_results.tsv", sep="\t", index=False)
-        rfc_mean_ref_scores = np.array(rfc_ref_scores).mean(axis=1)
-        rfc_mean_ref_scores_df = pd.DataFrame({"model": range(len(rfc_mean_ref_scores)), "ref_score": rfc_mean_ref_scores})
-        rfc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_ref_scores.tsv", sep="\t", index=False)
+        # # RFC
+        # rfc_mean_perm_res, rfc_ref_scores, rfc_perm_res_dfs = collect_feature_perm_results(
+        #     rfcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
+        # )
+        # rfc_merge_df = merge_perm_results(rfc_perm_res_dfs)
+        # rfc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_results.tsv", sep="\t", index=False)
+        # rfc_mean_ref_scores = np.array(rfc_ref_scores).mean(axis=1)
+        # rfc_mean_ref_scores_df = pd.DataFrame({"model": range(len(rfc_mean_ref_scores)), "ref_score": rfc_mean_ref_scores})
+        # rfc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_ref_scores.tsv", sep="\t", index=False)
 
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
