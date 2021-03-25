@@ -46,12 +46,14 @@ test_all_genes_km <- function(count_df, cutoff_df, gene_names) {
 test_all_genes_cph <- function(count_df, gene_names) {
     n_genes <- length(gene_names)
     pvals <- rep(1, n_genes)
+    coeffs <- rep(0, n_genes)
     for (i in seq_len(n_genes)) {
         gene_i <- gene_names[i]
         cph_fit <- coxph(as.formula(paste0("Surv(survival_time, vital_status) ~ ", gene_i)), data = count_df)
         pvals[i] <- summary(cph_fit)$logtest["pvalue"]
+        coeffs[i] <- as.numeric(cph_fit$coefficient)
     }
-    tibble(geneID = gene_names, cph_pval = pvals, cph_qval = WGCNA::qvalue(cph_pval)$qvalues)
+    tibble(geneID = gene_names, cph_pval = pvals, cph_qval = WGCNA::qvalue(cph_pval)$qvalues, coeff = coeffs)
 }
 
 for (dset_idx in 1:3) {
