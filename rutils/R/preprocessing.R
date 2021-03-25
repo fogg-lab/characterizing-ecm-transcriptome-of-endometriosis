@@ -298,3 +298,23 @@ lr_l1_meta <- function(score_df, res_df, baseline_df) {
         genes = consensus_genes
     )
 }
+
+wgcna_meta <- function(me_df, mm_df, q_me_thresh, p_mm_thresh, keeper_genes) {
+    condensed_me_df <- me_df %>%
+        condense_figo(include_pvals = TRUE) %>%
+        dplyr::rename_if(!startsWith(colnames(.), "module"), ~ gsub("^", "me_", .))
+    filtered_network_df <- mm_df %>%
+        dplyr::select(geneID, module, mm_pval, mm_cor) %>%
+        inner_join(condensed_me_df, by = "module") %>%
+        dplyr::filter(me_figo_min_qval < q_me_thresh) %>%
+        # Make sure genes are significant members of the module
+        dplyr::filter(mm_pval < p_mm_thresh) %>%
+        # Make sure genes are highly connected within the module
+        dplyr::filter(geneID %in% keeper_genes)
+    list(
+        n_sig_modules = length(unique(filtered_network_df$module)),
+        n_sig_genes = nrow(filtered_network_df),
+        modules = unique(filtered_network_df$module),
+        genes = filtered_network_df$geneID
+    )
+}
