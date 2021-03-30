@@ -35,17 +35,20 @@ test_all_genes_km <- function(count_df, cutoff_df, gene_names) {
         cutoff <- cutoff_df %>%
             filter(geneID == gene_i) %>%
             pull(cutoff)
+
         # If there's only one group (no good cutoff), use median
         tryCatch({
             simp_df <- get_high_low(simp_df, gene_i, cutoff)
             km_fit <- survfit(Surv(survival_time, vital_status) ~ high_low, type = "kaplan-meier", data = simp_df)
             km_diff <- survdiff(Surv(survival_time, vital_status) ~ high_low, data = simp_df)
+            pvals[i] <- pchisq(km_diff$chisq, length(km_diff$n) - 1, lower.tail = FALSE)
         }, error = function(error_condition) {
             simp_df <- get_high_low(simp_df, gene_i, median(count_df[[gene_i]]))
             km_fit <- survfit(Surv(survival_time, vital_status) ~ high_low, type = "kaplan-meier", data = simp_df)
             km_diff <- survdiff(Surv(survival_time, vital_status) ~ high_low, data = simp_df)
+            pvals[i] <- pchisq(km_diff$chisq, length(km_diff$n) - 1, lower.tail = FALSE)
         })
-        pvals[i] <- pchisq(km_diff$chisq, length(km_diff$n) - 1, lower.tail = FALSE)
+        
     }
     tibble(geneID = gene_names, km_pval = pvals, km_qval = WGCNA::qvalue(km_pval)$qvalues)
 }
@@ -82,13 +85,15 @@ for (dset_idx in 1:3) {
     # Combine survival data and normalized count data
     filtered_joined_df <- filtered_survival_df %>%
         inner_join(norm_matrisome_counts_t_df, by = "sample_name") %>%
-        select(one_of("sample_name", "vital_status", "survival_time", umsmg_demg_list)) %>%
+        # select(one_of("sample_name", "vital_status", "survival_time", umsmg_demg_list)) %>%
         # cannot have survival times of 0 for univariate Cox PH analysis
         dplyr::filter(survival_time > 0)
 
     gene_names <- colnames(filtered_joined_df)[-(1:3)]
-    km_df <- test_all_genes_km(filtered_joined_df, cutoff_df, gene_names)
-    cph_df <- test_all_genes_cph(filtered_joined_df, gene_names)
+    no_var_genes <- gene_names[(apply(filtered_joined_df[, -c(1:3)], 2, var) == 0)]
+    filt_gene_names <- gene_names[!(gene_names %in% no_var_genes)]
+    km_df <- test_all_genes_km(filtered_joined_df, cutoff_df, filt_gene_names)
+    cph_df <- test_all_genes_cph(filtered_joined_df, filt_gene_names)
     joined_surv_df <- km_df %>%
         inner_join(cph_df, by = "geneID")
     write_tsv(joined_surv_df, paste0(dirs$analysis_dir, "/survival/", unified_dsets[dset_idx], "_univ_survival_results.tsv"))
