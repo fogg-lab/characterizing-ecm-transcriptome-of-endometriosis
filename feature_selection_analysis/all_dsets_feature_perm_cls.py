@@ -20,8 +20,11 @@ def make_lr(h_params, matrisome_genes):
     if pd.isna(h_params["class_weight"]):
         h_params["class_weight"] = None
     model = make_pipeline(
+        # c_transformer = ColumnTransformer([
+        #     ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+        # ], remainder="passthrough")
         ColumnTransformer([
-            ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+            ("standard", StandardScaler(), list(matrisome_genes))
         ], remainder="passthrough"),
         LogisticRegression(
             C=h_params["C"],
@@ -71,9 +74,9 @@ matrisome_list = f"{dirs.data_dir}/matrisome/matrisome_hs_masterlist.tsv"
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
-covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
+# covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["figo_stage"]
-cat_cols = ["race", "ethnicity"]
+# cat_cols = ["race", "ethnicity"]
 
 
 scoring_method = "f1_macro"
@@ -85,8 +88,9 @@ def main():
         # Load and filter survival data
         survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
         filtered_survival_df = (
-            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
-                .pipe(pd.get_dummies, columns=cat_cols)
+            # prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols].dropna(), to="n")
+                # .pipe(pd.get_dummies, columns=cat_cols)
                 .reset_index(drop = True)
                 .pipe(prep.cols_to_front, ["sample_name", "figo_num"])
         )

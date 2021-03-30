@@ -35,9 +35,16 @@ test_all_genes_km <- function(count_df, cutoff_df, gene_names) {
         cutoff <- cutoff_df %>%
             filter(geneID == gene_i) %>%
             pull(cutoff)
-        simp_df <- get_high_low(simp_df, gene_i, cutoff)
-        km_fit <- survfit(Surv(survival_time, vital_status) ~ high_low, type = "kaplan-meier", data = simp_df)
-        km_diff <- survdiff(Surv(survival_time, vital_status) ~ high_low, data = simp_df)
+        # If there's only one group (no good cutoff), use median
+        tryCatch({
+            simp_df <- get_high_low(simp_df, gene_i, cutoff)
+            km_fit <- survfit(Surv(survival_time, vital_status) ~ high_low, type = "kaplan-meier", data = simp_df)
+            km_diff <- survdiff(Surv(survival_time, vital_status) ~ high_low, data = simp_df)
+        }, error = function(error_condition) {
+            simp_df <- get_high_low(simp_df, gene_i, median(count_df[[gene_i]]))
+            km_fit <- survfit(Surv(survival_time, vital_status) ~ high_low, type = "kaplan-meier", data = simp_df)
+            km_diff <- survdiff(Surv(survival_time, vital_status) ~ high_low, data = simp_df)
+        })
         pvals[i] <- pchisq(km_diff$chisq, length(km_diff$n) - 1, lower.tail = FALSE)
     }
     tibble(geneID = gene_names, km_pval = pvals, km_qval = WGCNA::qvalue(km_pval)$qvalues)
