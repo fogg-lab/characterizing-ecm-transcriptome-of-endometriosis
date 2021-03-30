@@ -31,7 +31,7 @@ def objective(h_params, X, y, penalty_default, scoring_default, r, c_transformer
             random_state=r
         )
     )
-    return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
+    return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=10), n_jobs=-1, scoring=scoring_default))
 
 
 def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, matrisome_genes, n_initial, n_calls, callback_file):

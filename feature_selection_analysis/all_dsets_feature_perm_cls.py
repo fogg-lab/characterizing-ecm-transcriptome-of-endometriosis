@@ -43,7 +43,7 @@ def collect_feature_perm_results(models, x_df, y_df, r, gene_cols, score, verbos
     for i, m in enumerate(models):
         if verbose:
             print(f"Running feature perm for model {i}")
-        perm_results, ref_scores = opt.cv_permutation_importance(m, x_df, y_df, score, k=5, random_state=r, to_array=to_array)
+        perm_results, ref_scores = opt.cv_permutation_importance(m, x_df, y_df, score, k=10, random_state=r, to_array=to_array)
         perm_importances = np.concatenate([r.importances for r in perm_results], axis=1)
         perm_importance_means = np.mean(perm_importances, axis=1)
         
