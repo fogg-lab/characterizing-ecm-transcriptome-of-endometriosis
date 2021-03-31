@@ -96,5 +96,5 @@ for (dset_idx in 1:3) {
     cph_df <- test_all_genes_cph(filtered_joined_df, filt_gene_names)
     joined_surv_df <- km_df %>%
         inner_join(cph_df, by = "geneID")
-    write_tsv(joined_surv_df, paste0(dirs$analysis_dir, "/survival/", unified_dsets[dset_idx], "_univ_survival_results.tsv"))
+    write_tsv(joined_surv_df, paste0(dirs$analysis_dir, "/feature_selection/", unified_dsets[dset_idx], "_univ_survival_results.tsv"))
 }

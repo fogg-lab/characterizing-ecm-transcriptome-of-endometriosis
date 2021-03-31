@@ -12,9 +12,9 @@ unified_dsets <- c("unified_cervical_data", "unified_uterine_data", "unified_ute
 matrisome_path <- paste0(dirs$data_dir, "/matrisome/matrisome_hs_masterlist.tsv")
 
 event_code <- list("Alive" = 0, "Dead" = 1)
-covariate_cols_no_figo <- c("age_at_diagnosis", "race", "ethnicity")
-covariate_cols <- c("figo_stage", covariate_cols_no_figo)
-dep_cols <- c("vital_status", "survival_time")
+# covariate_cols_no_figo <- c("age_at_diagnosis", "race", "ethnicity")
+# covariate_cols <- c("figo_stage", covariate_cols_no_figo)
+# dep_cols <- c("vital_status", "survival_time")
 
 for (dset_idx in 1:3) {
     survival_path <- paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/survival_data.tsv")
@@ -23,9 +23,9 @@ for (dset_idx in 1:3) {
     # Load and filter survival data
     filtered_survival_df <- survival_df %>%
         decode_figo_stage(to = "c") %>%
-        dplyr::select(sample_name, figo_stage, race, ethnicity, age_at_diagnosis) %>% # make sure using same samples as classification models
-        dplyr::filter(rowSums(is.na(.)) == 0) %>%
-        dplyr::select(sample_name, figo_stage)
+        # dplyr::select(sample_name, figo_stage, race, ethnicity, age_at_diagnosis) %>% # make sure using same samples as classification models
+        dplyr::select(sample_name, figo_stage) %>% # make sure using same samples as classification models
+        dplyr::filter(rowSums(is.na(.)) == 0)
 
     # Load normalized matrisome count data
     norm_matrisome_counts_path <- paste0(dirs$data_dir, "/", unified_dsets[dset_idx], "/norm_matrisome_counts.tsv")
