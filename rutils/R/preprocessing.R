@@ -264,13 +264,6 @@ deg_meta <- function(df, lfc_thresh, q_thresh, n) {
 }
 
 
-simple_test_meta <- function(df, q_thresh) {
-    filt_df <- df %>%
-        dplyr::filter(qval < q_thresh)
-    list(n_sig = nrow(filt_df), genes = filt_df$geneID)
-}
-
-
 mi_meta <- function(df, pct_max_thresh) {
     ord_df <- df %>%
         dplyr::arrange(desc(mi_est)) %>%
