@@ -82,7 +82,8 @@ elasticnet_space = [
 n_initial = 10 * (len(elasticnet_space) + 1)
 n_calls = 50 * (len(elasticnet_space) + 1)
 
-scoring_method = "f1_macro"
+# scoring_method = "f1_macro"
+scoring_method = "balanced_accuracy"
 
 
 def main():

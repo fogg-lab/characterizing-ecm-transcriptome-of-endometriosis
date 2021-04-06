@@ -249,3 +249,65 @@ make_ea_df <- function(res, ea_type) {
     }
     return(df)
 }
+
+
+deg_meta <- function(df, lfc_thresh, q_thresh, n) {
+    deg_df <- df %>%
+        dplyr::filter(abs(lfc) > lfc_thresh, qval < q_thresh)
+    list(
+        n_deg = nrow(deg_df),
+        deg_prop = nrow(deg_df) / n,
+        n_up = nrow(deg_df %>% dplyr::filter(lfc > 0)),
+        n_down = nrow(deg_df %>% dplyr::filter(lfc < 0)),
+        genes = deg_df$geneID
+    )
+}
+
+
+mi_meta <- function(df, pct_max_thresh) {
+    ord_df <- df %>%
+        dplyr::arrange(desc(mi_est)) %>%
+        dplyr::mutate(pct_max = mi_est / first(mi_est) * 100) %>%
+        dplyr::filter(pct_max > pct_max_thresh)
+    list(
+        n_mi = nrow(ord_df),
+        genes = ord_df$geneID
+    )
+}
+
+
+lr_l1_meta <- function(score_df, res_df, baseline_df) {
+    consensus_genes <- res_df %>%
+        dplyr::filter(consensus == TRUE) %>%
+        pull(geneID)
+    avg_score <- mean(score_df$ref_score)
+    naive_pct_imp <- (avg_score - baseline_df$naive) / baseline_df$naive * 100
+    mc_pct_imp <- (avg_score - baseline_df$mc) / baseline_df$mc * 100
+    list(
+        avg_score = avg_score,
+        naive_pct_imp = naive_pct_imp,
+        mc_pct_imp = mc_pct_imp,
+        n_genes = length(consensus_genes),
+        genes = consensus_genes
+    )
+}
+
+wgcna_meta <- function(me_df, mm_df, q_me_thresh, p_mm_thresh, keeper_genes) {
+    condensed_me_df <- me_df %>%
+        condense_figo(include_pvals = TRUE) %>%
+        dplyr::rename_if(!startsWith(colnames(.), "module"), ~ gsub("^", "me_", .))
+    filtered_network_df <- mm_df %>%
+        dplyr::select(geneID, module, mm_pval, mm_cor) %>%
+        inner_join(condensed_me_df, by = "module") %>%
+        dplyr::filter(me_figo_min_qval < q_me_thresh) %>%
+        # Make sure genes are significant members of the module
+        dplyr::filter(mm_pval < p_mm_thresh) %>%
+        # Make sure genes are highly connected within the module
+        dplyr::filter(geneID %in% keeper_genes)
+    list(
+        n_sig_modules = length(unique(filtered_network_df$module)),
+        n_sig_genes = nrow(filtered_network_df),
+        modules = unique(filtered_network_df$module),
+        genes = filtered_network_df$geneID
+    )
+}

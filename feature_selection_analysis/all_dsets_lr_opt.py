@@ -31,7 +31,7 @@ def objective(h_params, X, y, penalty_default, scoring_default, r, c_transformer
             random_state=r
         )
     )
-    return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=5), n_jobs=-1, scoring=scoring_default))
+    return -np.mean(cross_val_score(model, X, y, cv=KFold(n_splits=10), n_jobs=-1, scoring=scoring_default))
 
 
 def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, matrisome_genes, n_initial, n_calls, callback_file):
@@ -64,9 +64,9 @@ unified_dsets = ["unified_cervical_data", "unified_uterine_data", "unified_uteri
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
-covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
+# covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["figo_stage"]
-cat_cols = ["race", "ethnicity"]
+# cat_cols = ["race", "ethnicity"]
 l1_space = [
     Real(1e-1, 1e1, name="C"),
     Categorical(["balanced", None], name="class_weight"),
@@ -97,8 +97,9 @@ def main():
         # Load and filter survival data
         survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
         filtered_survival_df = (
-            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
-                .pipe(pd.get_dummies, columns=cat_cols)
+            # prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols].dropna(), to="n")
+                # .pipe(pd.get_dummies, columns=cat_cols)
                 .reset_index(drop = True)
                 .pipe(prep.cols_to_front, ["sample_name", "figo_num"])
         )

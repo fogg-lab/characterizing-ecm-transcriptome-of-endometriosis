@@ -20,8 +20,11 @@ def make_lr(h_params, matrisome_genes):
     if pd.isna(h_params["class_weight"]):
         h_params["class_weight"] = None
     model = make_pipeline(
+        # c_transformer = ColumnTransformer([
+        #     ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+        # ], remainder="passthrough")
         ColumnTransformer([
-            ("standard", StandardScaler(), ["age_at_diagnosis"] + list(matrisome_genes))
+            ("standard", StandardScaler(), list(matrisome_genes))
         ], remainder="passthrough"),
         LogisticRegression(
             C=h_params["C"],
@@ -43,7 +46,7 @@ def collect_feature_perm_results(models, x_df, y_df, r, gene_cols, score, verbos
     for i, m in enumerate(models):
         if verbose:
             print(f"Running feature perm for model {i}")
-        perm_results, ref_scores = opt.cv_permutation_importance(m, x_df, y_df, score, k=5, random_state=r, to_array=to_array)
+        perm_results, ref_scores = opt.cv_permutation_importance(m, x_df, y_df, score, k=10, random_state=r, to_array=to_array)
         perm_importances = np.concatenate([r.importances for r in perm_results], axis=1)
         perm_importance_means = np.mean(perm_importances, axis=1)
         
@@ -71,9 +74,9 @@ matrisome_list = f"{dirs.data_dir}/matrisome/matrisome_hs_masterlist.tsv"
 seed = 123
 rand = np.random.RandomState()
 event_code = {"Alive": 0, "Dead": 1}
-covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
+# covariate_cols = ["age_at_diagnosis", "race", "ethnicity"]
 dep_cols = ["figo_stage"]
-cat_cols = ["race", "ethnicity"]
+# cat_cols = ["race", "ethnicity"]
 
 
 scoring_method = "f1_macro"
@@ -85,8 +88,9 @@ def main():
         # Load and filter survival data
         survival_df = prep.load_survival_df(f"{dirs.data_dir}/{unified_dsets[dset_idx]}/survival_data.tsv", event_code)
         filtered_survival_df = (
-            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
-                .pipe(pd.get_dummies, columns=cat_cols)
+            # prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols + covariate_cols].dropna(), to="n")
+            prep.decode_figo_stage(survival_df[["sample_name"] + dep_cols].dropna(), to="n")
+                # .pipe(pd.get_dummies, columns=cat_cols)
                 .reset_index(drop = True)
                 .pipe(prep.cols_to_front, ["sample_name", "figo_num"])
         )
@@ -119,19 +123,19 @@ def main():
             }
             l1_lrs.append(make_lr(l1_lr_h_params, matrisome_genes))
 
-        gbc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv", sep="\t")
-        gbcs = [
-            GradientBoostingClassifier(
-                **dict(zip(gbc_h_param_df.columns[:-1], gbc_h_param_df.iloc[i, :-1])), loss="deviance", random_state=rand
-            ) for i in range(gbc_h_param_df.shape[0])
-        ]
+        # gbc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_gbc_h_params_{scoring_method}.tsv", sep="\t")
+        # gbcs = [
+        #     GradientBoostingClassifier(
+        #         **dict(zip(gbc_h_param_df.columns[:-1], gbc_h_param_df.iloc[i, :-1])), loss="deviance", random_state=rand
+        #     ) for i in range(gbc_h_param_df.shape[0])
+        # ]
 
-        rfc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfc_h_params_{scoring_method}.tsv", sep="\t")
-        rfcs = [
-            RandomForestClassifier(
-                **dict(zip(rfc_h_param_df.columns[:-1], rfc_h_param_df.iloc[i, :-1])), random_state=rand, n_jobs=-1
-            ) for i in range(rfc_h_param_df.shape[0])
-        ]
+        # rfc_h_param_df = pd.read_csv(f"{dirs.analysis_dir}/model_opt/{unified_dsets[dset_idx]}_opt_rfc_h_params_{scoring_method}.tsv", sep="\t")
+        # rfcs = [
+        #     RandomForestClassifier(
+        #         **dict(zip(rfc_h_param_df.columns[:-1], rfc_h_param_df.iloc[i, :-1])), random_state=rand, n_jobs=-1
+        #     ) for i in range(rfc_h_param_df.shape[0])
+        # ]
 
         # Model feature perm.
         # LR (L1)
@@ -144,25 +148,25 @@ def main():
         l1_lr_mean_ref_scores_df = pd.DataFrame({"model": range(len(l1_lr_mean_ref_scores)), "ref_score": l1_lr_mean_ref_scores})
         l1_lr_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_l1_lr_ref_scores.tsv", sep="\t", index=False)
 
-        # GBC
-        gbc_mean_perm_res, gbc_ref_scores, gbc_perm_res_dfs = collect_feature_perm_results(
-            gbcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
-        )
-        gbc_merge_df = merge_perm_results(gbc_perm_res_dfs)
-        gbc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_results.tsv", sep="\t", index=False)
-        gbc_mean_ref_scores = np.array(gbc_ref_scores).mean(axis=1)
-        gbc_mean_ref_scores_df = pd.DataFrame({"model": range(len(gbc_mean_ref_scores)), "ref_score": gbc_mean_ref_scores})
-        gbc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_ref_scores.tsv", sep="\t", index=False)
+        # # GBC
+        # gbc_mean_perm_res, gbc_ref_scores, gbc_perm_res_dfs = collect_feature_perm_results(
+        #     gbcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
+        # )
+        # gbc_merge_df = merge_perm_results(gbc_perm_res_dfs)
+        # gbc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_results.tsv", sep="\t", index=False)
+        # gbc_mean_ref_scores = np.array(gbc_ref_scores).mean(axis=1)
+        # gbc_mean_ref_scores_df = pd.DataFrame({"model": range(len(gbc_mean_ref_scores)), "ref_score": gbc_mean_ref_scores})
+        # gbc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_gbc_ref_scores.tsv", sep="\t", index=False)
 
-        # RFC
-        rfc_mean_perm_res, rfc_ref_scores, rfc_perm_res_dfs = collect_feature_perm_results(
-            rfcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
-        )
-        rfc_merge_df = merge_perm_results(rfc_perm_res_dfs)
-        rfc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_results.tsv", sep="\t", index=False)
-        rfc_mean_ref_scores = np.array(rfc_ref_scores).mean(axis=1)
-        rfc_mean_ref_scores_df = pd.DataFrame({"model": range(len(rfc_mean_ref_scores)), "ref_score": rfc_mean_ref_scores})
-        rfc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_ref_scores.tsv", sep="\t", index=False)
+        # # RFC
+        # rfc_mean_perm_res, rfc_ref_scores, rfc_perm_res_dfs = collect_feature_perm_results(
+        #     rfcs, x_df, y_df, rand, matrisome_genes, scoring_method, to_array=True
+        # )
+        # rfc_merge_df = merge_perm_results(rfc_perm_res_dfs)
+        # rfc_merge_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_results.tsv", sep="\t", index=False)
+        # rfc_mean_ref_scores = np.array(rfc_ref_scores).mean(axis=1)
+        # rfc_mean_ref_scores_df = pd.DataFrame({"model": range(len(rfc_mean_ref_scores)), "ref_score": rfc_mean_ref_scores})
+        # rfc_mean_ref_scores_df.to_csv(f"{dirs.analysis_dir}/feature_selection/{unified_dsets[dset_idx]}_rfc_ref_scores.tsv", sep="\t", index=False)
 
 
         print(f"Completed dataset: {unified_dsets[dset_idx]}")
