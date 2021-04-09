@@ -154,6 +154,14 @@ if not os.path.exists(f"{figures_dir}/gene_lists"):
 else:
     print(f"[SUCCESS] Figures gene_lists directory already exists.")
 
+# Check existence of figures/models directory
+if not os.path.exists(f"{figures_dir}/models"):
+    os.makedirs(f"{figures_dir}/models")
+    print(f"[SUCCESS] Created figures/models directory: {figures_dir}/models")
+else:
+    print(f"[SUCCESS] Figures models directory already exists.")
+
+
 # Check existence of figures/one_off directory
 if not os.path.exists(f"{figures_dir}/one_off"):
     os.makedirs(f"{figures_dir}/one_off")
