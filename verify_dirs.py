@@ -154,12 +154,12 @@ if not os.path.exists(f"{figures_dir}/gene_lists"):
 else:
     print(f"[SUCCESS] Figures gene_lists directory already exists.")
 
-# Check existence of figures/survival directory
-if not os.path.exists(f"{figures_dir}/survival"):
-    os.makedirs(f"{figures_dir}/survival")
-    print(f"[SUCCESS] Created figures/survival directory: {figures_dir}/survival")
+# Check existence of figures/one_off directory
+if not os.path.exists(f"{figures_dir}/one_off"):
+    os.makedirs(f"{figures_dir}/one_off")
+    print(f"[SUCCESS] Created figures/one_off directory: {figures_dir}/one_off")
 else:
-    print(f"[SUCCESS] Figures survival directory already exists.")
+    print(f"[SUCCESS] Figures one_off directory already exists.")
 
 
 if all_present:
