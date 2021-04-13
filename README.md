@@ -1,16 +1,16 @@
 # Environment
 ## *conda* (*python* and base *R*)
-Base *R*, *python*, and all *python* packages are installed via the `conda` utility. To set up the conda environment, run the following from the root directory
+Base *R*, *python*, and all *python* packages are installed via the `conda` utility. To set up the *conda* environment, run the following from the root directory
 ```
 conda env create -f environment.yml
 ```
-and follow instructions given by *conda*.
+and follow instructions output in terminal.
 
 ### Troubleshooting
 It is possible that a package will no longer be available from the original source. If *conda* environment creation fails when installing a specific package, it may be solvable by doing the following.
 
 1. Find the line in the `environment.yml` file with the problem package, `scipy` for example.
-2. The line may look something like this
+2. The line will look something like this
 ```
   - scipy=1.6.0=py38hb2138dd_0
 ```
