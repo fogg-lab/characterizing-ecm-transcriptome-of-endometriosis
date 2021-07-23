@@ -63,6 +63,7 @@ downloader,0.4
 dplyr,1.0.4
 DT,0.17
 dynamicTreeCut,1.63-1
+egg,0.4.5
 ellipsis,0.3.1
 enrichplot,1.10.2
 eulerr,6.1.0
@@ -90,8 +91,9 @@ GenomeInfoDbData,1.2.4
 GenomicRanges,1.42.0
 GenSA,1.1.7
 gert,1.1.0
+ggalluvial,0.12.3
 GGally,2.1.1
-ggforce,0.3.2
+ggforce,0.3.3
 ggplot2,3.3.3
 ggplotify,0.0.5
 ggpubr,0.4.0
