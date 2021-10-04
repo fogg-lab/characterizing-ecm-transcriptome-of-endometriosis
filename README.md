@@ -6,22 +6,8 @@ conda env create -f environment.yml
 ```
 and follow instructions output in terminal.
 
-### Troubleshooting
-It is possible that a package will no longer be available from the original source. If *conda* environment creation fails when installing a specific package, it may be solvable by doing the following.
-
-1. Find the line in the `environment.yml` file with the problem package, `scipy` for example.
-2. The line will look something like this
-```
-  - scipy=1.6.0=py38hb2138dd_0
-```
-3. Change the line to look like this
-```
-  - scipy=1.6.0
-```
-4. Re-attempt *conda* environment creation.
-
 ## *R* packages
-The base *R* installation is done through *conda* but most *R* packages are installed through *R*. The file `r_packages.csv` contains all installed packages & versions. These should be installable via `install.versions()` using the data saved in the `r_packages.csv` file.
+The base *R* installation is done through *conda* but most *R* packages are installed through *R*. The file `r_packages.csv` contains all installed packages & versions. These should be installable via `install_version()` from the `devtools` package.
 
 # Project pathing
 ## Developer configuration file
