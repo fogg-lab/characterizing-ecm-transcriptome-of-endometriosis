@@ -12,4 +12,17 @@ cd endometriosis-microarray-analysis
 pip install -r requirements.txt
 ```
 
-## Data prep
+## Data preparation
+
+Run the Jupyter notebook, data_prep/prep.ipynb
+
+## Unsupervised analysis (hierarchical clustering)
+
+Run the Jupyter notebook, analysis/clustering.ipynb
+
+## Condition stratification
+
+```
+cd analysis
+python elasticnet_classification.py
+```

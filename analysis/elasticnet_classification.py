@@ -121,10 +121,13 @@ def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('data-dir', type=str, help='Directory containing data files.')
+    parser.add_argument('data-dir', type=str, help='Directory containing data files.',
+                        default=None)
     args = parser.parse_args()
 
     data_dir = args.data_dir
+    if data_dir is None:
+        data_dir = Path(__file__).parent.parent / "data"
     data_paths = DataPaths(data_dir)
 
     condition_map = {"healthy": 0, "endometriosis": 1}
