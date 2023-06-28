@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-import argparse
 from typing import Tuple
 import pandas as pd
 import numpy as np
@@ -14,17 +13,25 @@ from sklearn.model_selection import cross_val_score, KFold
 from scipy.optimize import OptimizeResult
 from sklearn.metrics import balanced_accuracy_score
 
+DATA_DIR = Path(__file__).parent.parent / "data"
+
+GENE_SETS = [
+    "all_genes",
+    "all_matrisome_genes",
+    "core_matrisome_genes"
+]
 
 class DataPaths:
-    def __init__(self, data_dir):
-        self._data_dir = Path(data_dir)
+    def __init__(self, DATA_DIR):
+        self._DATA_DIR = Path(DATA_DIR)
 
-    def __call__(self, phase, core=False, fit=True):
+    def __call__(self, phase, gene_set, fit=True):
         subdir = "fit" if fit else "test"
-        counts_filename = f"{phase}_{'core_' if core else ''}counts.tsv"
+
+        counts_filename = f"{phase}_{gene_set}_counts.tsv"
         coldata_filename = f"{phase}_coldata.tsv"
 
-        directory = self._data_dir / subdir
+        directory = self._DATA_DIR / subdir
 
         return str(directory / coldata_filename), str(directory / counts_filename)
 
@@ -120,15 +127,7 @@ def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, 
         print(e)
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('data-dir', type=str, help='Directory containing data files.',
-                        default=None)
-    args = parser.parse_args()
-
-    data_dir = args.data_dir
-    if data_dir is None:
-        data_dir = Path(__file__).parent.parent / "data"
-    data_paths = DataPaths(data_dir)
+    data_paths = DataPaths(DATA_DIR)
 
     condition_map = {"healthy": 0, "endometriosis": 1}
     rand = np.random.RandomState()
@@ -145,17 +144,17 @@ def main():
     model_evaluated = True
 
     for phase in ["all_phases", "early_secretory", "mid_secretory", "proliferative"]:
-        for core in [False, True]:
+        for gene_set in GENE_SETS:
             assert model_evaluated
             model_trained = False
             model_evaluated = False
             for fit in [True, False]:
-                coldata_path, counts_path = data_paths(phase, core, fit)
+                coldata_path, counts_path = data_paths(phase, gene_set, fit)
 
                 print()
                 print()
                 print("-"*80)
-                print(phase, core, fit)
+                print(phase, gene_set, fit)
                 print(f"{coldata_path=}")
                 print(f"{counts_path=}")
                 print("-"*80)
@@ -217,7 +216,7 @@ def main():
                     # Save results
                     results_df.to_csv(counts_path.replace("counts.tsv", "results.tsv"), sep="\t", index=False)
                     print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~TEST RESULTS~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                    print(f"{phase=}, {core=}, {coldata_path=}, {counts_path=}")
+                    print(f"{phase=}, {gene_set=}, {coldata_path=}, {counts_path=}")
                     print(f"Test score: {score}")
                     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 
