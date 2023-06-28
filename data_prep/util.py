@@ -49,6 +49,8 @@ def map_probes(counts_path, species, probe_map_dir, metadata_dir):
     accession_id = counts_fname.split("_")[0].lower()
     counts_df = read_csv(counts_path, sep="\t")
 
+    counts_df.columns = counts_df.columns.str.replace('.CEL', '', regex=False)
+
     probeset = get_series_probesets([accession_id], metadata_dir)[accession_id]
     if not probeset:
         return ""
@@ -70,6 +72,8 @@ def map_probes(counts_path, species, probe_map_dir, metadata_dir):
     cols = [cols[-1]] + cols[1:-1]
     counts_df = counts_df[cols]
     counts_df.dropna(inplace=True)
+
+    # remove ".CEL"
 
     return counts_df
 
@@ -93,6 +97,9 @@ def prep_geo_counts(data_dir: Path, probe_maps_dir: Path, metadata_dir: Path):
         new_counts_path = counts_path.replace("_unmapped.tsv", ".tsv")
         counts_df.to_csv(new_counts_path, sep="\t", index=False)
 
+        # remove old file
+        os.remove(counts_path)
+
 
 def download_file(url, target_path: Path):
     response = requests.get(url, stream=True)
@@ -106,12 +113,12 @@ def download_file(url, target_path: Path):
 def untar_and_unzip(tar_path: Path, output_dir: Path, delete_archive=False):
     # Extract tar file
     if tar_path.suffix == (".tar"):
-        with tarfile.open(tar_path, "r:") as tar:
+        with tarfile.open(tar_path, "r") as tar:
             tar.extractall(path=output_dir)
 
             # Go through the extracted files and extract gz files
             for member in tar.getmembers():
-                if str(member).endswith(".gz"):
+                if str(member.name).endswith(".gz"):
                     gz_path = output_dir / member.name
                     with gzip.open(gz_path, "rb") as f_in:
                         file_name = gz_path.with_suffix("").name
