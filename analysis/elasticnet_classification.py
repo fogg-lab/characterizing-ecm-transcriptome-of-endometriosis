@@ -235,14 +235,8 @@ def main():
     n_initial = 10 * (len(elasticnet_space) + 1)
     n_calls = 50 * (len(elasticnet_space) + 1)
 
-    model_trained = True
-    model_evaluated = True
-
     for phase in PHASES:
         for gene_set in GENE_SETS:
-            assert model_evaluated
-            model_trained = False
-            model_evaluated = False
             for fit in [True, False]:
                 coldata_path, counts_path = data_paths(phase, gene_set, fit)
 
@@ -272,7 +266,6 @@ def main():
                                                          n_calls, callback_file)
 
                 else:
-                    assert model_trained
                     evaluate_model(best_model, x_df, y_df, shuffled_df, counts_path, phase, gene_set, coldata_path)
 
 if __name__ == "__main__":
