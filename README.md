@@ -15,8 +15,8 @@ If you have R set up to install packages system-wide, you may need to do one of 
 **Run the following commands in a terminal:**
 
 ```
-git clone https://github.com/fogg-lab/endometriosis-microarray-analysis.git
-cd endometriosis-microarray-analysis
+git clone https://github.com/fogg-lab/characterizing-endometriosis-transcriptome.git
+cd characterizing-endometriosis-transcriptome
 pip install -r requirements.txt
 Rscript install_r_packages.r
 ```
