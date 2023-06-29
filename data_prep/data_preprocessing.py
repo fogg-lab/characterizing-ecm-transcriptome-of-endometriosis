@@ -21,10 +21,10 @@ def get_series_probesets(accessions, metadata_dir):
         dict: A dictionary mapping GEO series accessions to probesets.
     """
 
-    with open(metadata_dir / "series_platforms.json") as series_platforms_json:
+    with open(metadata_dir / "series_platforms.json", encoding="utf-8") as series_platforms_json:
         series_platforms = json.load(series_platforms_json)
 
-    with open(metadata_dir / "platform_probesets.json") as platform_probesets_json:
+    with open(metadata_dir / "platform_probesets.json", encoding="utf-8") as platform_probesets_json:
         platform_probesets = json.load(platform_probesets_json)
 
     supported_probesets = set()
@@ -91,8 +91,6 @@ def map_probes(counts_path, probe_map_dir, metadata_dir):
     cols = [cols[-1]] + cols[1:-1]
     counts_df = counts_df[cols]
     counts_df.dropna(inplace=True)
-
-    # remove ".CEL"
 
     return counts_df
 
