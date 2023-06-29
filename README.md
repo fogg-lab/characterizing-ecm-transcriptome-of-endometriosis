@@ -1,6 +1,4 @@
-# endometriosis-microarray-analysis
-
-Characterizing the extracellular matrix transcriptome of endometriosis
+# Characterizing the extracellular matrix transcriptome of endometriosis
 
 https://doi.org/10.1101/2023.03.08.531805
 
