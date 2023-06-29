@@ -1,16 +1,25 @@
 import os
 from pathlib import Path
-import requests
 import tarfile
 import gzip
 from glob import glob
 import shutil
 import json
+import requests
 from pandas import merge, read_csv, DataFrame
 
 
 def get_series_probesets(accessions, metadata_dir):
-    """Returns a dict of accessions with their respective probesets"""
+    """
+    Retrieves a dictionary mapping GEO series accessions to their respective probesets.
+
+    Args:
+        accessions (list): A list of GEO series accessions.
+        metadata_dir (Path): The directory containing the metadata.
+
+    Returns:
+        dict: A dictionary mapping GEO series accessions to probesets.
+    """
 
     with open(metadata_dir / "series_platforms.json") as series_platforms_json:
         series_platforms = json.load(series_platforms_json)
@@ -42,8 +51,18 @@ def get_series_probesets(accessions, metadata_dir):
     return series_probesets
 
 
-def map_probes(counts_path, species, probe_map_dir, metadata_dir):
-    """Maps probes to gene symbols"""
+def map_probes(counts_path, probe_map_dir, metadata_dir):
+    """
+    Maps probe IDs in an expression matrix to gene symbols.
+
+    Args:
+        counts_path (str): Path to the expression matrix file.
+        probe_map_dir (str): Directory containing probe maps.
+        metadata_dir (Path): Directory containing metadata files.
+
+    Returns:
+        DataFrame: A Pandas DataFrame with the mapped expression matrix.
+    """
 
     counts_fname = Path(counts_path).name
     accession_id = counts_fname.split("_")[0].lower()
@@ -55,7 +74,7 @@ def map_probes(counts_path, species, probe_map_dir, metadata_dir):
     if not probeset:
         return ""
     counts_df.rename(columns={"probe": probeset}, inplace=True)
-    probeset_map_path = Path(probe_map_dir) / f"{species}_{probeset}.tsv"
+    probeset_map_path = Path(probe_map_dir) / f"hsapiens_{probeset}.tsv"
     if not os.path.exists(probeset_map_path):
         print(f"No probe map found: {probeset_map_path}")
     else:
@@ -79,16 +98,33 @@ def map_probes(counts_path, species, probe_map_dir, metadata_dir):
 
 
 def get_unmapped_counts_paths(data_dir):
-    """Returns a list of paths to unmapped expression matrices"""
+    """
+    Retrieves paths to unmapped expression matrices.
+
+    Args:
+        data_dir (str): Path to the directory containing data files.
+
+    Returns:
+        list: A list of paths to unmapped expression matrices.
+    """
+
     unmapped_counts_path_pattern = os.path.join(data_dir, "*_counts_unmapped.tsv")
 
     return glob(unmapped_counts_path_pattern)
 
 
 def prep_geo_counts(data_dir: Path, probe_maps_dir: Path, metadata_dir: Path):
-    """Prepare unmapped expression matrices from GEO"""
+    """
+    Prepares unmapped expression matrices downloaded from GEO.
+
+    Args:
+        data_dir (Path): Path to the directory containing data files.
+        probe_maps_dir (Path): Path to the directory containing probe maps.
+        metadata_dir (Path): Path to the directory containing metadata files.
+    """
+
     for counts_path in get_unmapped_counts_paths(data_dir):
-        counts_df = map_probes(counts_path, "hsapiens", probe_maps_dir, metadata_dir)
+        counts_df = map_probes(counts_path, probe_maps_dir, metadata_dir)
 
         if not isinstance(counts_df, DataFrame) or len(counts_df) == 0:
             print(f"Could not map probes for {counts_path}")
@@ -102,6 +138,14 @@ def prep_geo_counts(data_dir: Path, probe_maps_dir: Path, metadata_dir: Path):
 
 
 def download_file(url, target_path: Path):
+    """
+    Downloads a file from a given URL.
+
+    Args:
+        url (str): The URL of the file to download.
+        target_path (Path): The path where the file should be saved.
+    """
+
     response = requests.get(url, stream=True)
 
     with open(target_path, "wb") as handle:
@@ -111,7 +155,15 @@ def download_file(url, target_path: Path):
 
 
 def untar_and_unzip(tar_path: Path, output_dir: Path, delete_archive=False):
-    # Extract tar file
+    """
+    Extracts files from a tar archive and decompresses gz files contained within it.
+
+    Args:
+        tar_path (Path): The path to the tar file.
+        output_dir (Path): The directory where files should be extracted.
+        delete_archive (bool): If True, the original tar file will be deleted after extraction.
+    """
+
     if tar_path.suffix == (".tar"):
         with tarfile.open(tar_path, "r") as tar:
             tar.extractall(path=output_dir)
