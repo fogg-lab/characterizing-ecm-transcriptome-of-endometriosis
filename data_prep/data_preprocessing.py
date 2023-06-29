@@ -6,6 +6,7 @@ from glob import glob
 import shutil
 import json
 import requests
+from requests.exceptions import Timeout
 from pandas import merge, read_csv, DataFrame
 
 
@@ -144,7 +145,10 @@ def download_file(url, target_path: Path):
         target_path (Path): The path where the file should be saved.
     """
 
-    response = requests.get(url, stream=True)
+    try:
+        response = requests.get(url, stream=True, timeout=30)
+    except Timeout as exc:
+        raise Exception(f"Request timed out: {url}") from exc
 
     with open(target_path, "wb") as handle:
         for chunk in response.iter_content(chunk_size=512):
