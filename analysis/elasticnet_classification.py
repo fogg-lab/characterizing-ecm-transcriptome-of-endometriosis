@@ -16,7 +16,7 @@ from skopt.space import Real
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
-OUTPUT_DIR = BASE_DIR / "output"
+OUTPUT_DIR = BASE_DIR / "output" / "condition_stratification"
 GENE_SETS = ["all_genes", "all_matrisome", "core_matrisome"]
 PHASES = ["all_phases", "early_secretory", "mid_secretory", "proliferative"]
 
@@ -137,23 +137,20 @@ def run_optimization(x_df, y_df, space, penalty_default, scoring_default, rand, 
         ("standard", StandardScaler(), genes)
     ], remainder="passthrough")
 
-    try:
-        res = gp_minimize(
-            lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), penalty_default, scoring_default, rand, c_transformer),
-            space,
-            verbose=True,
-            random_state=rand,
-            n_initial_points=n_initial,
-            n_calls=n_calls,
-            n_jobs=-1,
-            callback=lambda x: save_callback(x, callback_file, n=5, sep="\t")
-        )
-    except ValueError as e:
-        print(f"Optimization error: {e}")
+    gp_minimize(
+        lambda h_ps: objective(h_ps, x_df, y_df.values.squeeze(), penalty_default, scoring_default, rand, c_transformer),
+        space,
+        verbose=True,
+        random_state=rand,
+        n_initial_points=n_initial,
+        n_calls=n_calls,
+        n_jobs=-1,
+        callback=lambda x: save_callback(x, callback_file, n=5, sep="\t")
+    )
 
 
-def optimize_train_evaluate(x_df, y_df, elasticnet_space, penalty_default, scoring_method, rand,
-                            genes, n_initial, n_calls, callback_file):
+def optimize_and_train_model(x_df, y_df, elasticnet_space, penalty_default, scoring_method, rand,
+                             genes, n_initial, n_calls, callback_file):
     # Optimize models
     run_optimization(x_df, y_df, elasticnet_space, penalty_default, scoring_method, rand,
                      genes, n_initial, n_calls, callback_file)
@@ -205,7 +202,7 @@ def evaluate_model(best_model, x_df, y_df, shuffled_df, counts_path, phase, gene
         'predicted_label': predictions
     })
 
-    filename = Path(counts_path).name.replace("counts.tsv", "results_by_sample.tsv")
+    filename = Path(counts_path).name.replace("counts.tsv", "test_results.tsv")
     save_path = OUTPUT_DIR / filename
 
     # Save results
@@ -218,6 +215,9 @@ def evaluate_model(best_model, x_df, y_df, shuffled_df, counts_path, phase, gene
 
 def main():
     data_paths = DataPaths(DATA_DIR)
+
+    # Create output dir if it doesn't exist
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     # Mapping conditions to numerical values
     condition_map = {"healthy": 0, "endometriosis": 1}
@@ -263,10 +263,10 @@ def main():
                 x_df, y_df, shuffled_df = shuffle_data(joined_df, rand)
 
                 if fit:
-                    callback_filename = Path(counts_path).name.replace("counts.tsv", "results.tsv")
+                    callback_filename = Path(counts_path).name.replace("counts.tsv", "fit_results.tsv")
                     callback_file = OUTPUT_DIR / callback_filename
 
-                    best_model = optimize_train_evaluate(x_df, y_df, elasticnet_space, "elasticnet",
+                    best_model = optimize_and_train_model(x_df, y_df, elasticnet_space, "elasticnet",
                                                          scoring_method, rand, genes, n_initial,
                                                          n_calls, callback_file)
 
