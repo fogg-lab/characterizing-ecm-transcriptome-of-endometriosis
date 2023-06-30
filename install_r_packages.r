@@ -7,7 +7,12 @@ packages <- c("affy",
               "BiocGenerics",
               "BiocParallel",
               "genefilter",
-              "hgu133plus2cdf")
+              "hgu133plus2cdf",
+              "jsonlite",
+              "tibble",
+              "limma",
+              "yaml",
+              "ggrepel")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -19,7 +24,7 @@ for(package in packages) {
     if(!require(package, character.only = TRUE)) {
         if(package %in% rownames(installed.packages()) == FALSE) {
             print(paste("Installing", package))
-            if(package %in% c("BiocManager", "readr", "dplyr")) {
+            if(package %in% c("BiocManager", "readr", "dplyr", "jsonlite", "tibble", "yaml")) {
                 install.packages(package, dependencies = TRUE)
             } else {
                 BiocManager::install(package)

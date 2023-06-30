@@ -1,0 +1,7 @@
+min_expr: 5.6438
+min_prop: 0.25
+adj_method: "BH"
+padj_thresh: 0.05
+use_qual_weights: True
+contrast_level: "endometriosis"
+reference_level: "healthy"
