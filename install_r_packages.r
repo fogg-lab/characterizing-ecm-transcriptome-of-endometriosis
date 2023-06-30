@@ -24,7 +24,7 @@ for(package in packages) {
     if(!require(package, character.only = TRUE)) {
         if(package %in% rownames(installed.packages()) == FALSE) {
             print(paste("Installing", package))
-            if(package %in% c("BiocManager", "readr", "dplyr", "jsonlite", "tibble", "yaml")) {
+            if(package %in% c("BiocManager", "readr", "dplyr", "jsonlite", "tibble", "yaml", "ggrepel")) {
                 install.packages(package, dependencies = TRUE)
             } else {
                 BiocManager::install(package)
