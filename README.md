@@ -60,7 +60,7 @@ python elasticnet_classification.py
 
 ## Differential expression analysis
 
-Run the script, dgea.R.
+Run the script, analysis/dgea.R.
 
 **Usage**
 
