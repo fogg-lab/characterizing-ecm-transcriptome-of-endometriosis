@@ -30,10 +30,7 @@ The following R packages are installed automatically by the script, `install_r_p
 - yaml
 - ggrepel
 
-If you have R set up to install packages system-wide, you may need to do **one** of the following things:
-- Run `Rscript install_r_packages.r` as superuser/administrator.
-- Install these packages to a personal library.
-- Manually install the packages listed in the script.
+If you have R set up to install packages system-wide, you can either run the install script as admin, install to a personal library, or manually install the packages listed in the script.
 
 **SETUP: Run the following commands in a terminal:**
 
