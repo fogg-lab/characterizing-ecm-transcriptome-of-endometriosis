@@ -35,7 +35,7 @@ If you have R set up to install packages system-wide, you may need to do one of 
 - Install these packages to a personal library.
 - Manually install the packages listed in the script.
 
-**Run the following commands in a terminal:**
+**SETUP: Run the following commands in a terminal:**
 
 ```
 git clone https://github.com/fogg-lab/characterizing-endometriosis-transcriptome.git
