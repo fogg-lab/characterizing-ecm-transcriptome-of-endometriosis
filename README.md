@@ -76,12 +76,12 @@ In this example, we will run the `dgea.R` script with the following parameters:
 - `coldata_filepath`: The file `all_phases_coldata.tsv` contains sample conditions, e.g. healthy/endometriosis.
 - `config_filepath`: The YAML configuration file `dgea_config.yaml` is used.
 - `filter_filepath` (optional argument): We are using the filter list `core_matrisome_genes.json`.
-- `output_dir`: The results will be written to the `dgae_output` directory.
+- `output_dir`: The results will be written to the `dgea_output` directory.
 
 The command would be as follows:
 
 ```zsh
-Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_phases_coldata.tsv analysis/dgea_config.yaml analysis/core_matrisome_genes.json dgae_output
+Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_phases_coldata.tsv analysis/dgea_config.yaml analysis/core_matrisome_genes.json dgea_output
 ```
 
 **Command-line arguments (listed in positional order) for dgea.R**
