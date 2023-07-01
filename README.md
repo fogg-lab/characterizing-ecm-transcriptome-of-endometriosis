@@ -75,7 +75,7 @@ In this example, we will run the `dgea.R` script with the following parameters:
 - `counts_filepath`: The file `all_phases_all_genes_counts.tsv` contains count data. 
 - `coldata_filepath`: The file `all_phases_coldata.tsv` contains sample conditions, e.g. healthy/endometriosis.
 - `config_filepath`: The YAML configuration file `dgea_config.yaml` is used.
-- `filter_filepath`: We are using the optional filter file `core_matrisome_genes.json`.
+- `filter_filepath` (optional argument): We are using the filter list `core_matrisome_genes.json`.
 - `output_dir`: The results will be written to the `dgae_output` directory.
 
 The command would be as follows:
