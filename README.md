@@ -12,8 +12,6 @@ https://doi.org/10.1101/2023.03.08.531805
 
 ### 1. Install dependencies (R and Python packages)
 
-Please read through the R packages installation script (install_r_packages.r) before running it. Some of the listed R packages may require additional system dependencies. Packages that you may already have installed will be skipped.
-
 The following R packages are installed automatically by the script, `install_r_packages.r`:
 - affy
 - sva
@@ -30,7 +28,9 @@ The following R packages are installed automatically by the script, `install_r_p
 - yaml
 - ggrepel
 
-If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed in the script.
+Some of the listed R packages may require additional system dependencies.
+
+If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed above.
 
 **SETUP: Run the following commands in a terminal:**
 
@@ -60,7 +60,7 @@ python elasticnet_classification.py
 
 ## Differential expression analysis
 
-Run the script, dgea.R.
+Run the script, analysis/dgea.R
 
 **Usage**
 
@@ -70,12 +70,12 @@ Rscript dgea.R <counts_filepath> <coldata_filepath> <config_filepath> [<filter_f
 
 **Example - Performing differential gene expression analysis with a filter list**
 
-In this example, we are running the `dgea.R` script with the following parameters:
+In this example, we will run the `dgea.R` script with the following parameters:
 
 - `counts_filepath`: The file `all_phases_all_genes_counts.tsv` contains count data. 
 - `coldata_filepath`: The file `all_phases_coldata.tsv` contains sample conditions, e.g. healthy/endometriosis.
 - `config_filepath`: The YAML configuration file `dgea_config.yaml` is used.
-- `filter_filepath`: We are using the optional filter file `core_matrisome_genes.json` to only consider specific genes for the analysis.
+- `filter_filepath` (optional argument): We are using the filter list `core_matrisome_genes.json`.
 - `output_dir`: The results will be written to the `dgae_output` directory.
 
 The command would be as follows:
@@ -84,7 +84,7 @@ The command would be as follows:
 Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_phases_coldata.tsv analysis/dgea_config.yaml analysis/core_matrisome_genes.json dgae_output
 ```
 
-**Command-line arguments**
+**Command-line arguments (listed in positional order) for dgea.R**
 - `-h` or `-help`: Print usage information and exit.
 - counts_filepath: Path to the file containing count data.
 - coldata_filepath: Path to the file containing column data.
