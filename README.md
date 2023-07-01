@@ -12,8 +12,6 @@ https://doi.org/10.1101/2023.03.08.531805
 
 ### 1. Install dependencies (R and Python packages)
 
-Some of the listed R packages may require additional system dependencies.
-
 The following R packages are installed automatically by the script, `install_r_packages.r`:
 - affy
 - sva
@@ -29,6 +27,8 @@ The following R packages are installed automatically by the script, `install_r_p
 - limma
 - yaml
 - ggrepel
+
+Some of the listed R packages may require additional system dependencies.
 
 If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed above.
 
