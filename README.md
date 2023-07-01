@@ -12,7 +12,9 @@ https://doi.org/10.1101/2023.03.08.531805
 
 ### 1. Install dependencies (R and Python packages)
 
-Please read through the R packages installation script (install_r_packages.r) before running it. Some of the listed R packages may require additional system dependencies:
+Please read through the R packages installation script (install_r_packages.r) before running it. Some of the listed R packages may require additional system dependencies.
+
+R packages installed by the script, `install_r_packages.r`:
 - affy
 - sva
 - readr
