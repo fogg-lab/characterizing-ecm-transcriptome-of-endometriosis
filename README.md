@@ -70,7 +70,7 @@ Rscript dgea.R <counts_filepath> <coldata_filepath> <config_filepath> [<filter_f
 
 **Example - Performing differential gene expression analysis with a filter list**
 
-In this example, we are running the `dgea.R` script with the following parameters:
+In this example, we will run the `dgea.R` script with the following parameters:
 
 - `counts_filepath`: The file `all_phases_all_genes_counts.tsv` contains count data. 
 - `coldata_filepath`: The file `all_phases_coldata.tsv` contains sample conditions, e.g. healthy/endometriosis.
