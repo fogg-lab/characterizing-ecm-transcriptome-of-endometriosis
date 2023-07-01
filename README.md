@@ -60,7 +60,7 @@ python elasticnet_classification.py
 
 ## Differential expression analysis
 
-Run the script, analysis/dgea.R.
+Run the script, analysis/dgea.R
 
 **Usage**
 
@@ -84,7 +84,7 @@ The command would be as follows:
 Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_phases_coldata.tsv analysis/dgea_config.yaml analysis/core_matrisome_genes.json dgae_output
 ```
 
-**Command-line arguments for dgea.R**
+**Command-line arguments (listed in positional order) for dgea.R**
 - `-h` or `-help`: Print usage information and exit.
 - counts_filepath: Path to the file containing count data.
 - coldata_filepath: Path to the file containing column data.
