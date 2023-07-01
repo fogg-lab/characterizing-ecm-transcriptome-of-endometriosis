@@ -14,7 +14,7 @@ If you have R set up to install packages system-wide, you may need to do one of 
 
 **Run the following commands in a terminal:**
 
-```
+```zsh
 git clone https://github.com/fogg-lab/characterizing-endometriosis-transcriptome.git
 cd characterizing-endometriosis-transcriptome
 pip install -r requirements.txt
@@ -33,7 +33,41 @@ Run the Jupyter notebook, analysis/clustering.ipynb
 
 Run the script:
 
-```
+```zsh
 cd analysis
 python elasticnet_classification.py
 ```
+
+## Differential expression analysis
+
+Run the script, dgea.R.
+
+**Usage**
+
+```zsh
+Rscript dgea.R <counts_filepath> <coldata_filepath> <config_filepath> [<filter_filepath>] <output_dir>
+```
+
+**Example - Performing differential gene expression analysis with a filter list**
+
+In this example, we are running the `dgea.R` script with the following parameters:
+
+- `counts_filepath`: The file `all_phases_all_genes_counts.tsv` contains count data. 
+- `coldata_filepath`: The file `all_phases_coldata.tsv` contains sample conditions, e.g. healthy/endometriosis.
+- `config_filepath`: The YAML configuration file `dgea_config.yaml` is used.
+- `filter_filepath`: We are using the optional filter file `core_matrisome_genes.json` to only consider specific genes for the analysis.
+- `output_dir`: The results will be written to the `dgae_output` directory.
+
+The command would be as follows:
+
+```zsh
+Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_phases_coldata.tsv analysis/dgea_config.yaml analysis/core_matrisome_genes.json dgae_output
+```
+
+**Command-line arguments**
+- `-h` or `-help`: Print usage information and exit.
+- counts_filepath: Path to the file containing count data.
+- coldata_filepath: Path to the file containing column data.
+- config_filepath: Path to the YAML file containing configuration settings.
+- filter_filepath: (Optional) Path to the JSON file containing gene filter list.
+- output_dir: Directory where the output file will be written.
