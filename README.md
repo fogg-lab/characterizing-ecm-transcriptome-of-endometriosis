@@ -7,8 +7,8 @@ https://doi.org/10.1101/2023.03.08.531805
 ### Prerequisites
 
 - **Jupyter Notebook**
-- **R** (tested with R 4.2)
 - **Python 3.7+** (tested with Python 3.9)
+- **R** (tested with R 4.2)
 
 ### 1. Install dependencies (R and Python packages)
 
