@@ -34,3 +34,12 @@ for(package in packages) {
         print(paste(package, "already installed"))
     }
 }
+
+# Install IRkernel for Jupyter notebook
+install.packages('devtools')
+devtools::install_github('IRkernel/IRkernel')
+
+#IRkernel::installspec()  # to register the kernel in the current R installation
+# Comment-out above line as it may not be able to see jupyter installed via package managers
+# Instead, we will add a cell to notebooks that need the R kernel with the following:
+# `!R -e "IRkernel::installspec()"`

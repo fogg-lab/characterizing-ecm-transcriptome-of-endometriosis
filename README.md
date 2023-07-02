@@ -27,6 +27,8 @@ The following R packages are installed automatically by the script, `install_r_p
 - limma
 - yaml
 - ggrepel
+- devtools
+- IRkernel (`devtools::install_github('IRkernel/IRkernel')`)
 
 Some of the listed R packages may require additional system dependencies.
 
