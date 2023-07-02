@@ -88,8 +88,8 @@ Rscript analysis/dgea.R data/all/all_phases_all_genes_counts.tsv data/all/all_ph
 
 **Command-line arguments (listed in positional order) for dgea.R**
 - `-h` or `-help`: Print usage information and exit.
-- counts_filepath: Path to the file containing count data.
-- coldata_filepath: Path to the file containing column data.
-- config_filepath: Path to the YAML file containing configuration settings.
-- filter_filepath: (Optional) Path to the JSON file containing gene filter list.
-- output_dir: Directory where the output file will be written.
+- `counts_filepath`: Path to the file containing count data.
+- `coldata_filepath`: Path to the file containing column data.
+- `config_filepath`: Path to the YAML file containing configuration settings.
+- `filter_filepath`: (Optional) Path to the JSON file containing gene filter list.
+- `output_dir`: Directory where the output file will be written.
