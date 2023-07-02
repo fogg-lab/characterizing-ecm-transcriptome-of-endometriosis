@@ -28,11 +28,11 @@ The following R packages are installed automatically by the script, `install_r_p
 - yaml
 - ggrepel
 - devtools
-- IRkernel (`devtools::install_github('IRkernel/IRkernel')`)
+- IRkernel
 
 Some of the listed R packages may require additional system dependencies.
 
-If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed above.
+If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed above (note that IRkernel is installed via `devtools::install_github('IRkernel/IRkernel')`).
 
 **SETUP: Run the following commands in a terminal:**
 
