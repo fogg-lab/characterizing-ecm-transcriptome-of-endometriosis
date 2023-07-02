@@ -35,8 +35,8 @@ If you have R set up to install packages system-wide (rather than to a personal 
 **SETUP: Run the following commands in a terminal:**
 
 ```zsh
-git clone https://github.com/fogg-lab/characterizing-endometriosis-transcriptome.git
-cd characterizing-endometriosis-transcriptome
+git clone https://github.com/fogg-lab/characterizing-ecm-transcriptome-of-endometriosis.git
+cd characterizing-ecm-transcriptome-of-endometriosis
 pip install -r requirements.txt
 Rscript install_r_packages.r
 ```
