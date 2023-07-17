@@ -60,6 +60,10 @@ cd analysis
 python elasticnet_classification.py
 ```
 
+## Compile stratification results and generate figures
+
+Run the Jupyter notebook, analysis/get_stratification_results.ipynb
+
 ## Differential expression analysis
 
 Run the script, analysis/dgea.R
