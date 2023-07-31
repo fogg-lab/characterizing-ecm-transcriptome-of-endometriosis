@@ -3,80 +3,80 @@
         "All Genes": {
             "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 24,
+            "True Negatives": 16,
             "True Positives": 21
         },
         "All Matrisome": {
             "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 24,
+            "True Negatives": 16,
             "True Positives": 21
         },
         "Core Matrisome": {
-            "False Negatives": 5,
-            "False Positives": 1,
-            "True Negatives": 23,
-            "True Positives": 16
+            "False Negatives": 2,
+            "False Positives": 0,
+            "True Negatives": 16,
+            "True Positives": 19
         }
     },
     "Early Secretory Phase": {
         "All Genes": {
             "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 6,
-            "True Positives": 8
+            "True Negatives": 3,
+            "True Positives": 6
         },
         "All Matrisome": {
-            "False Negatives": 1,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 6,
-            "True Positives": 7
+            "True Negatives": 3,
+            "True Positives": 6
         },
         "Core Matrisome": {
-            "False Negatives": 4,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 6,
-            "True Positives": 4
+            "True Negatives": 3,
+            "True Positives": 6
         }
     },
     "Mid Secretory Phase": {
         "All Genes": {
-            "False Negatives": 3,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 5,
-            "True Positives": 3
+            "True Negatives": 8,
+            "True Positives": 9
         },
         "All Matrisome": {
-            "False Negatives": 1,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 5,
-            "True Positives": 5
+            "True Negatives": 8,
+            "True Positives": 9
         },
         "Core Matrisome": {
-            "False Negatives": 4,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 5,
-            "True Positives": 2
+            "True Negatives": 8,
+            "True Positives": 9
         }
     },
     "Proliferative Phase": {
         "All Genes": {
             "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 13,
-            "True Positives": 7
+            "True Negatives": 5,
+            "True Positives": 6
         },
         "All Matrisome": {
-            "False Negatives": 1,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 13,
+            "True Negatives": 5,
             "True Positives": 6
         },
         "Core Matrisome": {
-            "False Negatives": 3,
+            "False Negatives": 0,
             "False Positives": 0,
-            "True Negatives": 13,
-            "True Positives": 4
+            "True Negatives": 5,
+            "True Positives": 6
         }
     }
 }
