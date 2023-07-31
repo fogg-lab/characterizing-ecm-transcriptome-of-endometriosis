@@ -64,6 +64,10 @@ python elasticnet_classification.py
 
 Run the Jupyter notebook, analysis/get_stratification_results.ipynb
 
+## Enrichment analysis
+
+Run the Jupyter notebook, analysis/enrichment_analysis.ipynb
+
 ## Differential expression analysis
 
 Run the script, analysis/dgea.R
