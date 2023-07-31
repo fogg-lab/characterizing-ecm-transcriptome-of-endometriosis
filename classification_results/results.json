@@ -1,0 +1,82 @@
+{
+    "All Phases": {
+        "All Genes": {
+            "False Negatives": 0,
+            "False Positives": 0,
+            "True Negatives": 24,
+            "True Positives": 21
+        },
+        "All Matrisome": {
+            "False Negatives": 0,
+            "False Positives": 0,
+            "True Negatives": 24,
+            "True Positives": 21
+        },
+        "Core Matrisome": {
+            "False Negatives": 5,
+            "False Positives": 1,
+            "True Negatives": 23,
+            "True Positives": 16
+        }
+    },
+    "Early Secretory Phase": {
+        "All Genes": {
+            "False Negatives": 0,
+            "False Positives": 0,
+            "True Negatives": 6,
+            "True Positives": 8
+        },
+        "All Matrisome": {
+            "False Negatives": 1,
+            "False Positives": 0,
+            "True Negatives": 6,
+            "True Positives": 7
+        },
+        "Core Matrisome": {
+            "False Negatives": 4,
+            "False Positives": 0,
+            "True Negatives": 6,
+            "True Positives": 4
+        }
+    },
+    "Mid Secretory Phase": {
+        "All Genes": {
+            "False Negatives": 3,
+            "False Positives": 0,
+            "True Negatives": 5,
+            "True Positives": 3
+        },
+        "All Matrisome": {
+            "False Negatives": 1,
+            "False Positives": 0,
+            "True Negatives": 5,
+            "True Positives": 5
+        },
+        "Core Matrisome": {
+            "False Negatives": 4,
+            "False Positives": 0,
+            "True Negatives": 5,
+            "True Positives": 2
+        }
+    },
+    "Proliferative Phase": {
+        "All Genes": {
+            "False Negatives": 0,
+            "False Positives": 0,
+            "True Negatives": 13,
+            "True Positives": 7
+        },
+        "All Matrisome": {
+            "False Negatives": 1,
+            "False Positives": 0,
+            "True Negatives": 13,
+            "True Positives": 6
+        },
+        "Core Matrisome": {
+            "False Negatives": 3,
+            "False Positives": 0,
+            "True Negatives": 13,
+            "True Positives": 4
+        }
+    }
+}
