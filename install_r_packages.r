@@ -13,7 +13,6 @@ packages <- c("affy",
               "limma",
               "yaml",
               "ggrepel",
-              "GOSemSim",
               "clusterProfiler",
               "stringi",
               "org.Hs.eg.db")

@@ -23,12 +23,15 @@ The following R packages are installed automatically by the script, `install_r_p
 - genefilter
 - hgu133plus2cdf
 - jsonlite
+- org.Hs.eg.db
+- stringi
 - tibble
 - limma
 - yaml
 - ggrepel
 - devtools
 - IRkernel
+- clusterProfiler
 
 Some of the listed R packages may require additional system dependencies.
 
