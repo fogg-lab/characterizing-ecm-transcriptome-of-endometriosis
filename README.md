@@ -60,12 +60,12 @@ Run the script:
 
 ```zsh
 cd analysis
-python elasticnet_classification.py
+python regression classifier.py
 ```
 
-## Compile stratification results and generate figures
+## Compile condition stratification results and generate figures
 
-Run the Jupyter notebook, analysis/get_stratification_results.ipynb
+Run the Jupyter notebook, analysis/get_classification_results.ipynb
 
 ## Enrichment analysis
 
