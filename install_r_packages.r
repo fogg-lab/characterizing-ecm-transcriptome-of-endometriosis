@@ -15,7 +15,8 @@ packages <- c("affy",
               "ggrepel",
               "clusterProfiler",
               "stringi",
-              "org.Hs.eg.db")
+              "org.Hs.eg.db",
+              "car")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
@@ -27,7 +28,7 @@ for(package in packages) {
     if(!require(package, character.only = TRUE)) {
         if(package %in% rownames(installed.packages()) == FALSE) {
             print(paste("Installing", package))
-            if(package %in% c("BiocManager", "readr", "dplyr", "jsonlite", "tibble", "yaml", "ggrepel", "stringi")) {
+            if(package %in% c("BiocManager", "readr", "dplyr", "jsonlite", "tibble", "yaml", "ggrepel", "stringi", "car")) {
                 install.packages(package, dependencies = TRUE)
             } else {
                 BiocManager::install(package)
