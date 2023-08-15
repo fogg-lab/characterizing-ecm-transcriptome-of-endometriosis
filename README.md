@@ -37,7 +37,7 @@ Some of the listed R packages may require additional system dependencies.
 
 If you have R set up to install packages system-wide (rather than to a personal user library), you can either run the install script as admin/superuser, or manually install the packages listed above (note that IRkernel is installed via `devtools::install_github('IRkernel/IRkernel')`).
 
-**SETUP: Run the following commands in a terminal:**
+**Setup: Run the following commands at the command line:**
 
 ```zsh
 git clone https://github.com/fogg-lab/characterizing-ecm-transcriptome-of-endometriosis.git
