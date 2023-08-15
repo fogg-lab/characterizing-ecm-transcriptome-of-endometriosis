@@ -1,2 +1,3 @@
 analysis/*.ipynb linguist-vendored
 data_prep/*.ipynb linguist-vendored
+expression_mean_plots/*.ipynb linguist-vendored
