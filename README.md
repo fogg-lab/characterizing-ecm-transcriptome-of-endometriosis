@@ -1,6 +1,6 @@
 # Characterizing the extracellular matrix transcriptome of endometriosis
 
-https://doi.org/10.1101/2023.03.08.531805
+https://link.springer.com/article/10.1007/s43032-023-01359-w
 
 ## Setup
 
